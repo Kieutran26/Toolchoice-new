@@ -5,21 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from "@/lib/utils";
-
-const CATEGORY_LABELS = {
-  analytics: 'ANALYTICS',
-  ai_ml: 'AI / ML',
-  design: 'DESIGN',
-  devtools: 'DEV TOOLS',
-  database: 'DATABASE',
-  hosting: 'HOSTING',
-  security: 'SECURITY',
-  marketing: 'MARKETING',
-  productivity: 'PRODUCTIVITY',
-  communication: 'COMMS',
-  payments: 'PAYMENTS',
-  automation: 'AUTOMATION',
-};
+import { getCategoryLabel } from "@/lib/tool-categories";
 
 export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
   if (!tool) return null;
@@ -75,27 +61,34 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
 
               <div className="px-5 py-5 space-y-5 -mt-10 relative">
                 {/* Title Block */}
-                <div className="flex items-start gap-3">
-                  {tool.logo_url ? (
-                    <img src={tool.logo_url} alt="" className="w-12 h-12 rounded-lg bg-secondary border border-border object-contain flex-shrink-0" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-lg bg-secondary border border-border flex items-center justify-center flex-shrink-0">
-                      <span className="text-lg font-bold font-mono text-primary">{tool.name?.[0]}</span>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <ToolLogoLarge tool={tool} />
+                    <div className="min-w-0">
+                      <h2 className="text-xl font-bold text-foreground truncate">{tool.name}</h2>
+                      <p className="text-xs text-muted-foreground leading-relaxed mt-0.5 line-clamp-2">{tool.short_description}</p>
                     </div>
-                  )}
-                  <div>
-                    <h2 className="text-xl font-bold text-foreground">{tool.name}</h2>
-                    <p className="text-sm text-muted-foreground mt-0.5">{tool.short_description}</p>
                   </div>
+                  {tool.website_url && (
+                    <a href={tool.website_url} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
+                      <Button className="custom-primary-button font-mono tracking-wider text-[10px] sm:text-xs px-3 h-9 flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5" />
+                        TRUY CẬP WEBSITE
+                        <ExternalLink className="w-3 h-3" />
+                      </Button>
+                    </a>
+                  )}
                 </div>
 
                 {/* Badges */}
                 <div className="flex flex-wrap gap-1.5">
                   <PricingBadgeLarge pricing={tool.pricing} />
-                  <Badge variant="outline" className="text-[10px] font-mono tracking-wider px-2 py-0.5 border-border text-muted-foreground">
-                    <Layers className="w-3 h-3 mr-1" />
-                    {CATEGORY_LABELS[tool.category]}
-                  </Badge>
+                  {(tool.categories?.length ? tool.categories : [tool.category]).map((category) => (
+                    <Badge key={category} variant="outline" className="text-[10px] font-mono tracking-wider px-2 py-0.5 border-border text-muted-foreground">
+                      <Layers className="w-3 h-3 mr-1" />
+                      {getCategoryLabel(category)}
+                    </Badge>
+                  ))}
                   {tool.has_api && (
                     <Badge variant="outline" className="text-[10px] font-mono tracking-wider px-2 py-0.5 border-primary/30 text-primary">
                       <Cpu className="w-3 h-3 mr-1" />
@@ -104,20 +97,7 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
                   )}
                 </div>
 
-                <Separator className="bg-border" />
 
-                {/* Technical Specs Grid */}
-                <div>
-                  <h3 className="text-[10px] font-mono font-semibold text-muted-foreground tracking-[0.15em] mb-3">
-                    TECHNICAL SPECS
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <SpecItem label="PRICING" value={tool.pricing?.toUpperCase() || 'N/A'} />
-                    <SpecItem label="API" value={tool.has_api ? 'YES' : 'NO'} />
-                    <SpecItem label="CATEGORY" value={CATEGORY_LABELS[tool.category] || 'N/A'} />
-                    <SpecItem label="STATUS" value={tool.is_trending ? 'TRENDING' : 'STABLE'} highlight={tool.is_trending} />
-                  </div>
-                </div>
 
                 {/* Platforms */}
                 {tool.platforms?.length > 0 && (
@@ -164,18 +144,7 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
                   </div>
                 )}
 
-                {/* CTA */}
-                {tool.website_url && (
-                  <div className="pt-2">
-                    <a href={tool.website_url} target="_blank" rel="noopener noreferrer">
-                      <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-mono tracking-wider text-xs h-10">
-                        <Globe className="w-3.5 h-3.5 mr-2" />
-                        TRUY CẬP WEBSITE
-                        <ExternalLink className="w-3 h-3 ml-2" />
-                      </Button>
-                    </a>
-                  </div>
-                )}
+
               </div>
             </div>
           </motion.div>
@@ -185,26 +154,33 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
   );
 }
 
-function SpecItem({ label, value, highlight }) {
+function ToolLogoLarge({ tool }) {
   return (
-    <div className="px-3 py-2.5 rounded bg-secondary/50 border border-border">
-      <p className="text-[9px] font-mono text-muted-foreground/60 tracking-[0.15em]">{label}</p>
-      <p className={cn(
-        "text-xs font-mono font-semibold mt-0.5",
-        highlight ? "text-primary" : "text-foreground"
-      )}>
-        {value}
-      </p>
+    <div className="relative w-12 h-12 rounded-lg bg-secondary border border-border overflow-hidden flex-shrink-0">
+      {tool.logo_url && (
+        <img
+          src={tool.logo_url}
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain bg-secondary"
+          onError={(event) => {
+            event.currentTarget.remove();
+          }}
+        />
+      )}
+      <div className="w-full h-full flex items-center justify-center">
+        <span className="text-lg font-bold font-mono text-primary">{tool.name?.[0]}</span>
+      </div>
     </div>
   );
 }
+
 
 function PricingBadgeLarge({ pricing }) {
   if (pricing === 'free') {
     return (
       <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-2 py-1 rounded"
         style={{ background: 'hsl(var(--free-color) / 0.12)', color: 'hsl(var(--free-color))', border: '1px solid hsl(var(--free-color) / 0.25)' }}>
-        FREE
+        MIỄN PHÍ
       </span>
     );
   }
@@ -212,13 +188,14 @@ function PricingBadgeLarge({ pricing }) {
     return (
       <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-2 py-1 rounded"
         style={{ background: 'hsl(var(--paid-color) / 0.12)', color: 'hsl(var(--paid-color))', border: '1px solid hsl(var(--paid-color) / 0.25)' }}>
-        PAID
+        TRẢ PHÍ
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-2 py-1 rounded bg-primary/10 text-primary border border-primary/20">
-      FREEMIUM
+    <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-2 py-1 rounded"
+      style={{ background: 'hsl(var(--trial-color) / 0.12)', color: 'hsl(var(--trial-color))', border: '1px solid hsl(var(--trial-color) / 0.25)' }}>
+      CÓ FREE TRIAL
     </span>
   );
 }

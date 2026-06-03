@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { base44 } from '@/api/base44Client';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { listTools } from '@/api/toolsClient';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Menu } from 'lucide-react';
 import CommandSidebar from '@/components/layout/CommandSidebar';
@@ -9,100 +9,114 @@ import ToolGrid from '@/components/tools/ToolGrid';
 import ToolDetailDrawer from '@/components/tools/ToolDetailDrawer';
 import PricingFilter from '@/components/tools/PricingFilter';
 import ThemeToggle from '@/components/layout/ThemeToggle';
-
-const CATEGORY_LABELS = {
-  analytics: 'ANALYTICS',
-  ai_ml: 'AI / ML',
-  design: 'DESIGN',
-  devtools: 'DEV TOOLS',
-  database: 'DATABASE',
-  hosting: 'HOSTING',
-  security: 'SECURITY',
-  marketing: 'MARKETING',
-  productivity: 'PRODUCTIVITY',
-  communication: 'COMMS',
-  payments: 'PAYMENTS',
-  automation: 'AUTOMATION',
-};
+import { getCategoryLabel, getCategoryIcon } from '@/lib/tool-categories';
+import { removeVietnameseTones } from '@/lib/utils';
 
 export default function CategoryPage() {
-  const { category } = useParams();
+  const { category: categoryParam } = useParams();
+  const category = decodeURIComponent(categoryParam || '');
+  const navigate = useNavigate();
   const [selectedTool, setSelectedTool] = useState(null);
   const [pricingFilter, setPricingFilter] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const { data: tools = [], isLoading } = useQuery({
-    queryKey: ['tools'],
-    queryFn: () => base44.entities.Tool.list('-created_date', 200),
+  const { data: tools = [], isLoading, error } = useQuery({
+    queryKey: ['supabase-tools', 'all'],
+    queryFn: () => listTools(200),
   });
 
   const categoryCounts = useMemo(() => {
     const counts = {};
-    tools.forEach(t => { counts[t.category] = (counts[t.category] || 0) + 1; });
+    tools.forEach(t => {
+      t.categories?.forEach(categoryName => {
+        counts[categoryName] = (counts[categoryName] || 0) + 1;
+      });
+    });
     return counts;
   }, [tools]);
 
   const filteredTools = useMemo(() => {
-    let result = tools.filter(t => t.category === category);
+    let result = tools.filter(t => t.categories?.includes(category));
     if (pricingFilter) result = result.filter(t => t.pricing === pricingFilter);
+    if (searchQuery.trim()) {
+      const q = removeVietnameseTones(searchQuery);
+      result = result.filter(t => removeVietnameseTones(t.name).includes(q));
+    }
     return result;
-  }, [tools, category, pricingFilter]);
+  }, [tools, category, pricingFilter, searchQuery]);
 
-  const label = CATEGORY_LABELS[category] || category?.toUpperCase();
+  const label = getCategoryLabel(category);
+  const Icon = getCategoryIcon(category);
 
   return (
     <div className="min-h-screen bg-background">
       <CommandSidebar
         activeCategory={category}
-        onCategoryChange={() => {}}
-        searchQuery=""
-        onSearchChange={() => {}}
+        onCategoryChange={(nextCategory) => {
+          navigate(nextCategory === 'all' ? '/' : `/category/${encodeURIComponent(nextCategory)}`);
+        }}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
         categoryCounts={categoryCounts}
         isMobileOpen={isMobileOpen}
         onMobileClose={() => setIsMobileOpen(false)}
       />
 
       <div className="lg:ml-64 min-h-screen flex flex-col">
-        <DataTicker totalTools={tools.length} categories={categoryCounts} />
+        {/* Sticky Header Container */}
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <DataTicker totalTools={tools.length} categories={categoryCounts} />
 
-        {/* Toolbar */}
-        <div className="flex items-center justify-between px-4 lg:px-5 py-3 border-b border-border">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsMobileOpen(true)}
-              className="lg:hidden w-8 h-8 rounded flex items-center justify-center hover:bg-accent text-muted-foreground"
-            >
-              <Menu className="w-4 h-4" />
-            </button>
-            <Link
-              to="/"
-              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-mono tracking-wider">BACK</span>
-            </Link>
-            <div className="w-px h-4 bg-border" />
-            <div>
-              <h2 className="text-sm font-semibold text-foreground">{label}</h2>
-              <p className="text-[10px] font-mono text-muted-foreground/60 tracking-wider">
-                {filteredTools.length} RESULTS FOUND
-              </p>
+          {/* Toolbar */}
+          <div className="flex items-center justify-between px-4 lg:px-5 py-3 border-b border-border">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsMobileOpen(true)}
+                className="lg:hidden w-8 h-8 rounded flex items-center justify-center hover:bg-accent text-muted-foreground"
+              >
+                <Menu className="w-4 h-4" />
+              </button>
+              <Link
+                to="/"
+                className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-mono tracking-wider">BACK</span>
+              </Link>
+              <div className="w-px h-4 bg-border" />
+              <div className="flex items-center gap-2.5">
+                {Icon && <Icon className="w-4 h-4 text-primary flex-shrink-0" />}
+                <div>
+                  <h2 className="text-sm font-semibold text-foreground leading-none">{label}</h2>
+                  <p className="text-[10px] font-mono text-muted-foreground/60 tracking-wider mt-1">
+                    {filteredTools.length} RESULTS FOUND
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <PricingFilter active={pricingFilter} onChange={setPricingFilter} />
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <PricingFilter active={pricingFilter} onChange={setPricingFilter} />
+              <ThemeToggle />
+            </div>
           </div>
         </div>
 
         {/* Grid */}
         <div className="flex-1 p-4 lg:p-5">
-          <ToolGrid
-            tools={filteredTools}
-            isLoading={isLoading}
-            onSelectTool={setSelectedTool}
-            activePricingFilter={pricingFilter}
-          />
+          {error ? (
+            <div className="rounded border border-destructive/30 bg-destructive/5 p-4">
+              <p className="text-xs font-mono text-destructive tracking-wider">SUPABASE LOAD ERROR</p>
+              <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
+            </div>
+          ) : (
+            <ToolGrid
+              tools={filteredTools}
+              isLoading={isLoading}
+              onSelectTool={setSelectedTool}
+              activePricingFilter={pricingFilter}
+            />
+          )}
         </div>
 
         {/* Terminal Footer */}

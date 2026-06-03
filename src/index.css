@@ -49,7 +49,8 @@
     --sidebar-ring: 114 43% 30%;
     /* Badge colors */
     --free-color: 134 60% 35%;
-    --paid-color: 36 90% 42%;
+    --trial-color: 36 90% 42%;
+    --paid-color: 0 75% 45%;
   }
 
   /* ── DARK MODE ── */
@@ -60,8 +61,8 @@
     --card-foreground: 214 32% 91%;
     --popover: 220 25% 7%;
     --popover-foreground: 214 32% 91%;
-    --primary: 185 100% 50%;
-    --primary-foreground: 220 20% 3%;
+    --primary: 114 43% 30%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 220 20% 12%;
     --secondary-foreground: 214 32% 91%;
     --muted: 220 20% 12%;
@@ -72,22 +73,23 @@
     --destructive-foreground: 0 0% 98%;
     --border: 215 30% 16%;
     --input: 215 30% 16%;
-    --ring: 185 100% 50%;
-    --chart-1: 185 100% 50%;
+    --ring: 114 43% 30%;
+    --chart-1: 114 43% 30%;
     --chart-2: 120 100% 63%;
     --chart-3: 51 100% 50%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     --sidebar-background: 220 25% 5%;
     --sidebar-foreground: 214 32% 91%;
-    --sidebar-primary: 185 100% 50%;
-    --sidebar-primary-foreground: 220 20% 3%;
+    --sidebar-primary: 114 43% 30%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 25% 10%;
     --sidebar-accent-foreground: 214 32% 91%;
     --sidebar-border: 215 30% 16%;
-    --sidebar-ring: 185 100% 50%;
+    --sidebar-ring: 114 43% 30%;
     --free-color: 120 100% 63%;
-    --paid-color: 51 100% 50%;
+    --trial-color: 51 100% 50%;
+    --paid-color: 0 100% 65%;
   }
 }
 
@@ -115,8 +117,8 @@
     0deg,
     transparent,
     transparent 2px,
-    rgba(0, 240, 255, 0.015) 2px,
-    rgba(0, 240, 255, 0.015) 4px
+    rgba(48, 109, 41, 0.015) 2px,
+    rgba(48, 109, 41, 0.015) 4px
   );
   pointer-events: none;
 }
@@ -145,3 +147,47 @@
   100% { transform: translateX(-50%); }
 }
 .ticker-scroll { animation: ticker-scroll 30s linear infinite; }
+
+/* ── Sidebar Active Item ── */
+.sidebar-active-item {
+  background-color: #306d29 !important;
+  color: #ffffff !important;
+  border: 1px solid #306d29 !important;
+}
+.sidebar-active-item .sidebar-count {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+.sidebar-active-item svg {
+  color: #ffffff !important;
+}
+
+/* ── Custom Data Ticker ── */
+.custom-data-ticker {
+  background-color: #306d29 !important;
+  border-bottom: 1px solid #306d29 !important;
+}
+.custom-data-ticker span {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* ── More Button ── */
+.more-button {
+  background-color: #306d29 !important;
+  color: #ffffff !important;
+  border: 1px solid #306d29 !important;
+}
+.more-button:hover {
+  background-color: #24521f !important;
+  border-color: #24521f !important;
+}
+
+/* ── Custom Primary Button ── */
+.custom-primary-button {
+  background-color: #306d29 !important;
+  color: #ffffff !important;
+  border: 1px solid #306d29 !important;
+}
+.custom-primary-button:hover {
+  background-color: #24521f !important;
+  border-color: #24521f !important;
+}
