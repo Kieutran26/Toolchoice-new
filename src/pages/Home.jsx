@@ -8,6 +8,7 @@ import ToolGrid from '@/components/tools/ToolGrid';
 import ToolDetailDrawer from '@/components/tools/ToolDetailDrawer';
 import PricingFilter from '@/components/tools/PricingFilter';
 import ThemeToggle from '@/components/layout/ThemeToggle';
+import CategorySection from '@/components/tools/CategorySection';
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -33,15 +34,8 @@ export default function Home() {
   // Filtered tools
   const filteredTools = useMemo(() => {
     let result = tools;
-    
-    if (activeCategory !== 'all') {
-      result = result.filter(t => t.category === activeCategory);
-    }
-    
-    if (pricingFilter) {
-      result = result.filter(t => t.pricing === pricingFilter);
-    }
-    
+    if (activeCategory !== 'all') result = result.filter(t => t.category === activeCategory);
+    if (pricingFilter) result = result.filter(t => t.pricing === pricingFilter);
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(t =>
@@ -50,9 +44,19 @@ export default function Home() {
         t.category?.toLowerCase().includes(q)
       );
     }
-    
     return result;
   }, [tools, activeCategory, searchQuery, pricingFilter]);
+
+  // Group by category for "all" view
+  const groupedByCategory = useMemo(() => {
+    if (activeCategory !== 'all') return null;
+    const groups = {};
+    filteredTools.forEach(t => {
+      if (!groups[t.category]) groups[t.category] = [];
+      groups[t.category].push(t);
+    });
+    return groups;
+  }, [filteredTools, activeCategory]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -96,12 +100,32 @@ export default function Home() {
 
         {/* Grid */}
         <div className="flex-1 p-4 lg:p-5">
-          <ToolGrid
-            tools={filteredTools}
-            isLoading={isLoading}
-            onSelectTool={setSelectedTool}
-            activePricingFilter={pricingFilter}
-          />
+          {groupedByCategory ? (
+            <div className="space-y-8">
+              {Object.entries(groupedByCategory).map(([cat, catTools]) => (
+                <CategorySection
+                  key={cat}
+                  category={cat}
+                  tools={catTools}
+                  onSelectTool={setSelectedTool}
+                  pricingFilter={pricingFilter}
+                />
+              ))}
+              {Object.keys(groupedByCategory).length === 0 && !isLoading && (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <span className="text-2xl font-mono text-muted-foreground/30">∅</span>
+                  <p className="text-sm font-mono text-muted-foreground tracking-wider mt-3">KHÔNG TÌM THẤY CÔNG CỤ NÀO</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <ToolGrid
+              tools={filteredTools}
+              isLoading={isLoading}
+              onSelectTool={setSelectedTool}
+              activePricingFilter={pricingFilter}
+            />
+          )}
         </div>
 
         {/* Terminal Footer */}
