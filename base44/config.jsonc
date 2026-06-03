@@ -1,5 +1,5 @@
 {
-  "name": "untitled",
+  "name": "Neural Nexus",
   "site": {
     "installCommand": "npm install",
     "buildCommand": "npm run build",
