@@ -7,6 +7,7 @@ import DataTicker from '@/components/layout/DataTicker';
 import ToolGrid from '@/components/tools/ToolGrid';
 import ToolDetailDrawer from '@/components/tools/ToolDetailDrawer';
 import PricingFilter from '@/components/tools/PricingFilter';
+import ThemeToggle from '@/components/layout/ThemeToggle';
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState('all');
@@ -87,7 +88,10 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <PricingFilter active={pricingFilter} onChange={setPricingFilter} />
+          <div className="flex items-center gap-2">
+            <PricingFilter active={pricingFilter} onChange={setPricingFilter} />
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Grid */}

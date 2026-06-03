@@ -202,21 +202,23 @@ function SpecItem({ label, value, highlight }) {
 function PricingBadgeLarge({ pricing }) {
   if (pricing === 'free') {
     return (
-      <Badge className="text-[10px] font-mono font-bold tracking-wider bg-[hsl(120,100%,63%)]/10 text-[hsl(120,100%,63%)] border border-[hsl(120,100%,63%)]/20 hover:bg-[hsl(120,100%,63%)]/15">
+      <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-2 py-1 rounded"
+        style={{ background: 'hsl(var(--free-color) / 0.12)', color: 'hsl(var(--free-color))', border: '1px solid hsl(var(--free-color) / 0.25)' }}>
         FREE
-      </Badge>
+      </span>
     );
   }
   if (pricing === 'paid') {
     return (
-      <Badge className="text-[10px] font-mono font-bold tracking-wider bg-[hsl(51,100%,50%)]/10 text-[hsl(51,100%,50%)] border border-[hsl(51,100%,50%)]/20 hover:bg-[hsl(51,100%,50%)]/15">
+      <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-2 py-1 rounded"
+        style={{ background: 'hsl(var(--paid-color) / 0.12)', color: 'hsl(var(--paid-color))', border: '1px solid hsl(var(--paid-color) / 0.25)' }}>
         PAID
-      </Badge>
+      </span>
     );
   }
   return (
-    <Badge className="text-[10px] font-mono font-bold tracking-wider bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15">
+    <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-2 py-1 rounded bg-primary/10 text-primary border border-primary/20">
       FREEMIUM
-    </Badge>
+    </span>
   );
 }

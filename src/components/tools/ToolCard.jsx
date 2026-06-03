@@ -88,14 +88,16 @@ export default function ToolCard({ tool, onSelect, dimmed }) {
 function PricingBadge({ pricing }) {
   if (pricing === 'free') {
     return (
-      <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-1.5 py-0.5 rounded bg-[hsl(120,100%,63%)]/10 text-[hsl(120,100%,63%)] border border-[hsl(120,100%,63%)]/20">
+      <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-1.5 py-0.5 rounded"
+        style={{ background: 'hsl(var(--free-color) / 0.12)', color: 'hsl(var(--free-color))', border: '1px solid hsl(var(--free-color) / 0.25)' }}>
         FREE
       </span>
     );
   }
   if (pricing === 'paid') {
     return (
-      <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-1.5 py-0.5 rounded bg-[hsl(51,100%,50%)]/10 text-[hsl(51,100%,50%)] border border-[hsl(51,100%,50%)]/20">
+      <span className="inline-flex items-center text-[10px] font-mono font-bold tracking-wider px-1.5 py-0.5 rounded"
+        style={{ background: 'hsl(var(--paid-color) / 0.12)', color: 'hsl(var(--paid-color))', border: '1px solid hsl(var(--paid-color) / 0.25)' }}>
         PAID
       </span>
     );
