@@ -1,0 +1,86 @@
+{
+  "name": "Tool",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the tool"
+    },
+    "short_description": {
+      "type": "string",
+      "description": "Brief one-line description"
+    },
+    "full_description": {
+      "type": "string",
+      "description": "Detailed description of the tool"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "analytics",
+        "ai_ml",
+        "design",
+        "devtools",
+        "database",
+        "hosting",
+        "security",
+        "marketing",
+        "productivity",
+        "communication",
+        "payments",
+        "automation"
+      ],
+      "description": "Primary category"
+    },
+    "pricing": {
+      "type": "string",
+      "enum": [
+        "free",
+        "freemium",
+        "paid"
+      ],
+      "description": "Pricing model"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL to the tool logo"
+    },
+    "feature_image_url": {
+      "type": "string",
+      "description": "URL to the feature image"
+    },
+    "website_url": {
+      "type": "string",
+      "description": "Official website URL"
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Key features list"
+    },
+    "platforms": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Supported platforms"
+    },
+    "has_api": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the tool has an API"
+    },
+    "is_trending": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the tool is trending"
+    }
+  },
+  "required": [
+    "name",
+    "category",
+    "pricing"
+  ]
+}
