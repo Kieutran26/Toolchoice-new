@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Search, ChevronRight, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, ChevronRight, Heart, Shield } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { buildCategoryOptions } from "@/lib/tool-categories";
@@ -71,8 +72,8 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
                   <span className="flex-1 text-left tracking-wide">{cat.label}</span>
                   {cat.count !== null && (
                     <span className={cn(
-                      "text-[10px] font-mono tabular-nums min-w-[20px] text-right",
-                      isActive ? "sidebar-count" : "text-muted-foreground/50"
+                       "text-[10px] font-mono tabular-nums min-w-[20px] text-right",
+                       isActive ? "sidebar-count" : "text-muted-foreground/50"
                     )}>
                       {cat.count}
                     </span>
@@ -84,7 +85,7 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
           </div>
         </nav>
 
-        <div className="px-3 py-3 border-t border-border space-y-2.5">
+        <div className="px-3 py-3 border-t border-border space-y-2">
           <button 
             onClick={() => setIsDonateOpen(true)}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded text-xs font-mono font-bold custom-primary-button transition-all duration-200"
@@ -92,6 +93,7 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
             <Heart className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
             DONATE
           </button>
+
           <p className="text-[10px] font-mono text-muted-foreground/40 text-center tracking-wider">
             SYS::NEURAL_INDEX // 2026
           </p>

@@ -50,7 +50,7 @@ function splitCategories(categoryText) {
   const categories = String(categoryText || '')
     .split(';')
     .map((category) => category.trim())
-    .filter(Boolean);
+    .filter((category) => category && category !== 'Element Canva');
 
   return categories.length > 0 ? categories : ['Khác'];
 }
@@ -73,6 +73,18 @@ function normalizeTool(tool) {
     is_trending: Boolean(tool.is_featured || tool.is_best_choice),
     features: listFromText(tool.pros),
     created_date: tool.created_at,
+
+    // Expose raw database values for forms
+    raw_tagline: tool.tagline || '',
+    raw_description: tool.description || '',
+    raw_category_text: tool.category_text || '',
+    raw_pricing_type: tool.pricing_type || '',
+    raw_pros: tool.pros || '',
+    raw_link: tool.link || '',
+    raw_gallery_images: tool.gallery_images || '',
+    raw_is_featured: Boolean(tool.is_featured),
+    raw_is_best_choice: Boolean(tool.is_best_choice),
+    raw_status: tool.status || 'approved',
   };
 }
 
@@ -99,4 +111,115 @@ export async function listTools(limit = 200) {
 
   const tools = await response.json();
   return tools.map(normalizeTool);
+}
+
+export async function createTool(toolData) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Missing Supabase environment variables.');
+  }
+
+  const url = new URL('/rest/v1/tools', SUPABASE_URL);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify({
+      ...toolData,
+      status: toolData.status || 'approved'
+    }),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Unable to create tool in Supabase: ${response.status} - ${errText}`);
+  }
+
+  const result = await response.json();
+  return result[0] ? normalizeTool(result[0]) : null;
+}
+
+export async function updateTool(id, toolData) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Missing Supabase environment variables.');
+  }
+
+  const url = new URL('/rest/v1/tools', SUPABASE_URL);
+  url.searchParams.set('id', `eq.${id}`);
+
+  const response = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(toolData),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Unable to update tool in Supabase: ${response.status} - ${errText}`);
+  }
+
+  const result = await response.json();
+  return result[0] ? normalizeTool(result[0]) : null;
+}
+
+export async function deleteTool(id) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Missing Supabase environment variables.');
+  }
+
+  const url = new URL('/rest/v1/tools', SUPABASE_URL);
+  url.searchParams.set('id', `eq.${id}`);
+
+  const response = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Unable to delete tool from Supabase: ${response.status} - ${errText}`);
+  }
+
+  return true;
+}
+
+export async function uploadImage(file, bucket = 'tools') {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Missing Supabase environment variables.');
+  }
+
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+  const filePath = `${fileName}`;
+
+  const url = new URL(`/storage/v1/object/${bucket}/${filePath}`, SUPABASE_URL);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': file.type,
+    },
+    body: file,
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Unable to upload image to Supabase Storage: ${response.status} - ${errText}`);
+  }
+
+  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}`;
 }
