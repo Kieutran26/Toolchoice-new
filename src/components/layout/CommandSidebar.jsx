@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, ChevronRight, Heart } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { buildCategoryOptions } from "@/lib/tool-categories";
+import DonationModal from './DonationModal';
 
 export default function CommandSidebar({ activeCategory, onCategoryChange, searchQuery, onSearchChange, categoryCounts, isMobileOpen, onMobileClose }) {
+  const [isDonateOpen, setIsDonateOpen] = useState(false);
   const categories = buildCategoryOptions(categoryCounts);
 
   return (
@@ -84,7 +86,7 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
 
         <div className="px-3 py-3 border-t border-border space-y-2.5">
           <button 
-            onClick={() => alert("Cảm ơn bạn đã ủng hộ! Tính năng quyên góp (Donate) đang được cập nhật.")}
+            onClick={() => setIsDonateOpen(true)}
             className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded text-xs font-mono font-bold custom-primary-button transition-all duration-200"
           >
             <Heart className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
@@ -95,6 +97,8 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
           </p>
         </div>
       </aside>
+
+      <DonationModal isOpen={isDonateOpen} onClose={() => setIsDonateOpen(false)} />
     </>
   );
 }
