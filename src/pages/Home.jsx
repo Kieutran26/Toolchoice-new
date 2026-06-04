@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { listTools } from '@/api/toolsClient';
 import { useQuery } from '@tanstack/react-query';
 import { Menu } from 'lucide-react';
@@ -10,13 +11,18 @@ import PricingFilter from '@/components/tools/PricingFilter';
 import ThemeToggle from '@/components/layout/ThemeToggle';
 import CategorySection from '@/components/tools/CategorySection';
 import { removeVietnameseTones } from '@/lib/utils';
+import { slugToPricing, pricingToSlug, categoryToSlug } from '@/lib/tool-categories';
 
 export default function Home() {
-  const [activeCategory, setActiveCategory] = useState('all');
+  const { pricing: pricingParam } = useParams();
+  const navigate = useNavigate();
+
+  const activeCategory = 'all';
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTool, setSelectedTool] = useState(null);
-  const [pricingFilter, setPricingFilter] = useState(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
+  const pricingFilter = slugToPricing(pricingParam);
 
   const { data: tools = [], isLoading, error } = useQuery({
     queryKey: ['supabase-tools', 'all'],
@@ -37,7 +43,6 @@ export default function Home() {
   // Filtered tools
   const filteredTools = useMemo(() => {
     let result = tools;
-    if (activeCategory !== 'all') result = result.filter(t => t.categories?.includes(activeCategory));
     if (pricingFilter) result = result.filter(t => t.pricing === pricingFilter);
     if (searchQuery.trim()) {
       const q = removeVietnameseTones(searchQuery);
@@ -46,11 +51,10 @@ export default function Home() {
       );
     }
     return result;
-  }, [tools, activeCategory, searchQuery, pricingFilter]);
+  }, [tools, searchQuery, pricingFilter]);
 
   // Group by category for "all" view
   const groupedByCategory = useMemo(() => {
-    if (activeCategory !== 'all') return null;
     const groups = {};
     filteredTools.forEach(t => {
       t.categories?.forEach(category => {
@@ -59,13 +63,31 @@ export default function Home() {
       });
     });
     return groups;
-  }, [filteredTools, activeCategory]);
+  }, [filteredTools]);
+
+  const handlePricingChange = (newPricing) => {
+    if (!newPricing) {
+      navigate('/');
+    } else {
+      const slug = pricingToSlug(newPricing);
+      navigate(`/pricing/${slug}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <CommandSidebar
         activeCategory={activeCategory}
-        onCategoryChange={setActiveCategory}
+        onCategoryChange={(nextCategory) => {
+          if (nextCategory === 'all') {
+            const pSlug = pricingParam ? `pricing/${pricingParam}` : '';
+            navigate(`/${pSlug}`);
+          } else {
+            const catSlug = categoryToSlug(nextCategory);
+            const pSlug = pricingParam ? `/${pricingParam}` : '';
+            navigate(`/category/${catSlug}${pSlug}`);
+          }
+        }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         categoryCounts={categoryCounts}
@@ -90,7 +112,7 @@ export default function Home() {
               </button>
               <div>
                 <h2 className="text-sm font-semibold text-foreground">
-                  {activeCategory === 'all' ? 'Tất cả công cụ' : activeCategory.replace(/_/g, ' ').toUpperCase()}
+                  Tất cả công cụ
                 </h2>
                 <p className="text-[10px] font-mono text-muted-foreground/60 tracking-wider">
                   {filteredTools.length} RESULTS FOUND
@@ -98,7 +120,7 @@ export default function Home() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <PricingFilter active={pricingFilter} onChange={setPricingFilter} />
+              <PricingFilter active={pricingFilter} onChange={handlePricingChange} />
               <ThemeToggle />
             </div>
           </div>

@@ -21,7 +21,9 @@ const PublicApp = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/pricing/:pricing" element={<Home />} />
       <Route path="/category/:category" element={<CategoryPage />} />
+      <Route path="/category/:category/:pricing" element={<CategoryPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />

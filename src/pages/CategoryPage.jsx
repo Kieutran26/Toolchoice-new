@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { listTools } from '@/api/toolsClient';
@@ -10,15 +9,13 @@ import ToolGrid from '@/components/tools/ToolGrid';
 import ToolDetailDrawer from '@/components/tools/ToolDetailDrawer';
 import PricingFilter from '@/components/tools/PricingFilter';
 import ThemeToggle from '@/components/layout/ThemeToggle';
-import { getCategoryLabel, getCategoryIcon } from '@/lib/tool-categories';
+import { slugToCategory, slugToPricing, pricingToSlug, categoryToSlug, getCategoryLabel, getCategoryIcon } from '@/lib/tool-categories';
 import { removeVietnameseTones } from '@/lib/utils';
 
 export default function CategoryPage() {
-  const { category: categoryParam } = useParams();
-  const category = decodeURIComponent(categoryParam || '');
+  const { category: categoryParam, pricing: pricingParam } = useParams();
   const navigate = useNavigate();
   const [selectedTool, setSelectedTool] = useState(null);
-  const [pricingFilter, setPricingFilter] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -37,6 +34,16 @@ export default function CategoryPage() {
     return counts;
   }, [tools]);
 
+  const allAvailableCategories = useMemo(() => {
+    return Object.keys(categoryCounts);
+  }, [categoryCounts]);
+
+  const category = useMemo(() => {
+    return slugToCategory(categoryParam, allAvailableCategories);
+  }, [categoryParam, allAvailableCategories]);
+
+  const pricingFilter = slugToPricing(pricingParam);
+
   const filteredTools = useMemo(() => {
     let result = tools.filter(t => t.categories?.includes(category));
     if (pricingFilter) result = result.filter(t => t.pricing === pricingFilter);
@@ -50,12 +57,28 @@ export default function CategoryPage() {
   const label = getCategoryLabel(category);
   const Icon = getCategoryIcon(category);
 
+  const handlePricingChange = (newPricing) => {
+    if (!newPricing) {
+      navigate(`/category/${categoryParam}`);
+    } else {
+      const slug = pricingToSlug(newPricing);
+      navigate(`/category/${categoryParam}/${slug}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <CommandSidebar
         activeCategory={category}
         onCategoryChange={(nextCategory) => {
-          navigate(nextCategory === 'all' ? '/' : `/category/${encodeURIComponent(nextCategory)}`);
+          if (nextCategory === 'all') {
+            const pSlug = pricingParam ? `pricing/${pricingParam}` : '';
+            navigate(`/${pSlug}`);
+          } else {
+            const nextCatSlug = categoryToSlug(nextCategory);
+            const pSlug = pricingParam ? `/${pricingParam}` : '';
+            navigate(`/category/${nextCatSlug}${pSlug}`);
+          }
         }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -79,7 +102,7 @@ export default function CategoryPage() {
                 <Menu className="w-4 h-4" />
               </button>
               <Link
-                to="/"
+                to={pricingParam ? `/pricing/${pricingParam}` : "/"}
                 className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
@@ -97,7 +120,7 @@ export default function CategoryPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <PricingFilter active={pricingFilter} onChange={setPricingFilter} />
+              <PricingFilter active={pricingFilter} onChange={handlePricingChange} />
               <ThemeToggle />
             </div>
           </div>
