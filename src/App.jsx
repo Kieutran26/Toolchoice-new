@@ -8,6 +8,7 @@ import PageNotFound from './lib/PageNotFound';
 import ScrollToTop from './components/ScrollToTop';
 import Home from '@/pages/Home';
 import CategoryPage from '@/pages/CategoryPage';
+import Deals from '@/pages/Deals';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -24,6 +25,7 @@ const PublicApp = () => {
       <Route path="/pricing/:pricing" element={<Home />} />
       <Route path="/category/:category" element={<CategoryPage />} />
       <Route path="/category/:category/:pricing" element={<CategoryPage />} />
+      <Route path="/deals" element={<Deals />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />

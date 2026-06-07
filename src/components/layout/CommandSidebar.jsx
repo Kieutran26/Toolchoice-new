@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, ChevronRight, Heart, Shield } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { Search, ChevronRight, Heart, Shield, Percent, Sparkles } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { buildCategoryOptions } from "@/lib/tool-categories";
@@ -9,6 +9,8 @@ import DonationModal from './DonationModal';
 export default function CommandSidebar({ activeCategory, onCategoryChange, searchQuery, onSearchChange, categoryCounts, isMobileOpen, onMobileClose }) {
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const categories = buildCategoryOptions(categoryCounts);
+  const location = useLocation();
+  const isDealsActive = location.pathname.startsWith('/deals');
 
   return (
     <>
@@ -83,6 +85,24 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
               );
             })}
           </div>
+
+          {/* Divider separating Deals from regular categories */}
+          <div className="my-3 border-t border-dashed border-border" />
+
+          <Link
+            to="/deals"
+            onClick={() => onMobileClose?.()}
+            className={cn(
+              "relative flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-mono font-bold tracking-[0.15em] overflow-hidden transition-all duration-200 border",
+              isDealsActive
+                ? "bg-amber-400/15 border-amber-400/50 text-amber-600 dark:text-amber-300 shadow-sm"
+                : "bg-gradient-to-r from-amber-400/10 to-transparent border-amber-400/25 text-amber-600/80 dark:text-amber-300/80 hover:from-amber-400/15 hover:border-amber-400/40"
+            )}
+          >
+            <Percent className="w-4 h-4 flex-shrink-0" />
+            <span className="flex-1 text-left">DEALS & ƯU ĐÃI</span>
+            <Sparkles className="w-3.5 h-3.5 flex-shrink-0 animate-pulse" />
+          </Link>
         </nav>
 
         <div className="px-3 py-3 border-t border-border space-y-2">
