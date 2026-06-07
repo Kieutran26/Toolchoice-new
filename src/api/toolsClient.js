@@ -12,6 +12,7 @@ const TOOL_COLUMNS = [
   'link',
   'gallery_images',
   'logo_url',
+  'referral_offer',
   'is_featured',
   'is_best_choice',
   'created_at',
@@ -50,7 +51,7 @@ function splitCategories(categoryText) {
   const categories = String(categoryText || '')
     .split(';')
     .map((category) => category.trim())
-    .filter((category) => category && category !== 'Element Canva');
+    .filter(Boolean);
 
   return categories.length > 0 ? categories : ['Khác'];
 }
@@ -69,6 +70,7 @@ function normalizeTool(tool) {
     feature_image_url: firstImage(tool.gallery_images),
     logo_url: tool.logo_url,
     website_url: tool.link,
+    referral_offer: tool.referral_offer || '',
     has_api: false,
     is_trending: Boolean(tool.is_featured || tool.is_best_choice),
     features: listFromText(tool.pros),
@@ -82,6 +84,7 @@ function normalizeTool(tool) {
     raw_pros: tool.pros || '',
     raw_link: tool.link || '',
     raw_gallery_images: tool.gallery_images || '',
+    raw_referral_offer: tool.referral_offer || '',
     raw_is_featured: Boolean(tool.is_featured),
     raw_is_best_choice: Boolean(tool.is_best_choice),
     raw_status: tool.status || 'approved',

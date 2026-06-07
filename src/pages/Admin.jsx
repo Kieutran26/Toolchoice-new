@@ -24,6 +24,7 @@ const AVAILABLE_CATEGORIES = [
   'Extension',
   'Video & Audio',
   'SEO & Analytics',
+  'Repo Github',
   'Khác'
 ];
 
@@ -35,6 +36,7 @@ const INITIAL_FORM_STATE = {
   link: '',
   logo_url: '',
   gallery_images: '',
+  referral_offer: '',
   pros: '',
   is_featured: false,
   is_best_choice: false,
@@ -332,6 +334,7 @@ export default function Admin() {
       link: tool.raw_link || '',
       logo_url: tool.logo_url || '',
       gallery_images: tool.raw_gallery_images || '',
+      referral_offer: tool.raw_referral_offer || '',
       pros: tool.raw_pros || '',
       is_featured: tool.raw_is_featured || false,
       is_best_choice: tool.raw_is_best_choice || false,
@@ -394,6 +397,7 @@ export default function Admin() {
         link: formData.link.trim(),
         logo_url: formData.logo_url.trim() || null,
         gallery_images: formData.gallery_images.trim() || null,
+        referral_offer: formData.referral_offer.trim() || null,
         pros: formData.pros.trim() || null,
         is_featured: formData.is_featured,
         is_best_choice: formData.is_best_choice,
@@ -1040,6 +1044,19 @@ export default function Admin() {
                     onChange={handleInputChange}
                     placeholder="https://example.com/cover.png"
                     disabled={isSaving}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="referral_offer" className="text-xs font-semibold text-slate-300">Ưu đãi giới thiệu (Badge vàng nổi bật - để trống nếu không có)</label>
+                  <Input
+                    id="referral_offer"
+                    name="referral_offer"
+                    value={formData.referral_offer}
+                    onChange={handleInputChange}
+                    placeholder="VD: Bấm vào link để nhận ngay 100 credit"
+                    disabled={isSaving}
+                    className="bg-slate-900/60 border-slate-800 text-sm focus-visible:ring-primary focus-visible:border-primary text-slate-200"
                   />
                 </div>
 

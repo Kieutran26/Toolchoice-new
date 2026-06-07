@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ExternalLink, Globe, Cpu, Check, Layers } from 'lucide-react';
+import { X, ExternalLink, Globe, Cpu, Check, Layers, Gift } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -79,6 +79,19 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
                     </a>
                   )}
                 </div>
+
+                {/* Referral Offer */}
+                {tool.referral_offer && (
+                  <a
+                    href={tool.website_url || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold tracking-wide px-2.5 py-1.5 rounded-md bg-amber-400/15 text-amber-600 dark:text-amber-300 border border-amber-400/40 shadow-[0_0_0_1px_rgba(251,191,36,0.08)] hover:bg-amber-400/25 transition-colors"
+                  >
+                    <Gift className="w-3.5 h-3.5 flex-shrink-0" />
+                    {tool.referral_offer}
+                  </a>
+                )}
 
                 {/* Badges */}
                 <div className="flex flex-wrap gap-1.5">

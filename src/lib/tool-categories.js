@@ -1,4 +1,4 @@
-import { Bot, Boxes, Brain, Code2, Layers, Megaphone, Palette, Puzzle, Search, Sparkles, Zap } from 'lucide-react';
+import { Bot, Boxes, Brain, Code2, Github, Layers, Megaphone, Palette, Puzzle, Search, Sparkles, Zap } from 'lucide-react';
 import { removeVietnameseTones } from './utils';
 
 export const ALL_CATEGORY_ID = 'all';
@@ -7,6 +7,7 @@ const CATEGORY_ICON_RULES = [
   { match: ['AI'], icon: Brain },
   { match: ['Thiết kế'], icon: Palette },
   { match: ['Lập trình'], icon: Code2 },
+  { match: ['Repo Github'], icon: Github },
   { match: ['Plugin Figma'], icon: Puzzle },
   { match: ['Extension'], icon: Puzzle },
   { match: ['Marketing'], icon: Megaphone },
@@ -30,6 +31,7 @@ const CATEGORY_SLUGS_MAP = {
   'nang-suat': 'Năng suất',
   'lap-trinh': 'Lập trình',
   'plugin-figma': 'Plugin Figma',
+  'repo-github': 'Repo Github',
   'marketing': 'Marketing',
   'extension': 'Extension',
   'video-audio': 'Video & Audio',
@@ -96,7 +98,7 @@ export function slugToPricing(slug = '') {
 
 export function buildCategoryOptions(categoryCounts = {}) {
   const isLoaded = Object.keys(categoryCounts).length > 0;
-  const keys = (isLoaded ? Object.keys(categoryCounts) : [
+  const keys = isLoaded ? Object.keys(categoryCounts) : [
     'Thiết kế',
     'AI',
     'Năng suất',
@@ -106,8 +108,9 @@ export function buildCategoryOptions(categoryCounts = {}) {
     'Marketing',
     'Extension',
     'Video & Audio',
-    'SEO & Analytics'
-  ]).filter(category => category !== 'Element Canva');
+    'SEO & Analytics',
+    'Repo Github'
+  ];
 
   const categories = keys.map(category => ({
     id: category,
