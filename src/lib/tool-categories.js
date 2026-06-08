@@ -7,7 +7,7 @@ const CATEGORY_ICON_RULES = [
   { match: ['AI'], icon: Brain },
   { match: ['Thiết kế'], icon: Palette },
   { match: ['Lập trình'], icon: Code2 },
-  { match: ['Repo Github'], icon: Github },
+  { match: ['Repo GitHub'], icon: Github },
   { match: ['Plugin Figma'], icon: Puzzle },
   { match: ['Extension'], icon: Puzzle },
   { match: ['Marketing'], icon: Megaphone },
@@ -31,7 +31,7 @@ const CATEGORY_SLUGS_MAP = {
   'nang-suat': 'Năng suất',
   'lap-trinh': 'Lập trình',
   'plugin-figma': 'Plugin Figma',
-  'repo-github': 'Repo Github',
+  'repo-github': 'Repo GitHub',
   'marketing': 'Marketing',
   'extension': 'Extension',
   'video-audio': 'Video & Audio',
@@ -109,7 +109,7 @@ export function buildCategoryOptions(categoryCounts = {}) {
     'Extension',
     'Video & Audio',
     'SEO & Analytics',
-    'Repo Github'
+    'Repo GitHub'
   ];
 
   const categories = keys.map(category => ({

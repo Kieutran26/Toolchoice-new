@@ -24,7 +24,7 @@ const AVAILABLE_CATEGORIES = [
   'Extension',
   'Video & Audio',
   'SEO & Analytics',
-  'Repo Github',
+  'Repo GitHub',
   'Khác'
 ];
 
