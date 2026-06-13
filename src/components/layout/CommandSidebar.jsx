@@ -25,12 +25,9 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
       )}>
         <div className="px-4 py-5 border-b border-border">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded bg-primary/20 border border-primary/30 flex items-center justify-center">
-              {React.createElement(categories[0].icon, { className: "w-4 h-4 text-primary" })}
-            </div>
+            <img src="/logo.png" alt="Toolchoice" className="w-8 h-8 rounded" />
             <div>
-              <h1 className="text-sm font-bold tracking-wider text-foreground font-mono">NEURAL INDEX</h1>
-              <p className="text-[10px] font-mono text-muted-foreground tracking-widest">v2.4.1 // ACTIVE</p>
+              <h1 className="text-sm font-bold tracking-wider text-foreground font-mono">TOOLCHOICE</h1>
             </div>
           </div>
         </div>
