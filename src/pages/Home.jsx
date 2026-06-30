@@ -11,7 +11,7 @@ import PricingFilter from '@/components/tools/PricingFilter';
 import ThemeToggle from '@/components/layout/ThemeToggle';
 import CategorySection from '@/components/tools/CategorySection';
 import { removeVietnameseTones } from '@/lib/utils';
-import { slugToPricing, pricingToSlug, categoryToSlug } from '@/lib/tool-categories';
+import { slugToPricing, pricingToSlug, categoryToSlug, buildCategoryOptions } from '@/lib/tool-categories';
 
 export default function Home() {
   const { pricing: pricingParam } = useParams();
@@ -64,6 +64,13 @@ export default function Home() {
     });
     return groups;
   }, [filteredTools]);
+
+  // Get categories in the exact order of the sidebar
+  const orderedCategories = useMemo(() => {
+    return buildCategoryOptions(categoryCounts)
+      .filter(cat => cat.id !== 'all')
+      .map(cat => cat.id);
+  }, [categoryCounts]);
 
   const handlePricingChange = (newPricing) => {
     if (!newPricing) {
@@ -136,15 +143,19 @@ export default function Home() {
             </div>
           ) : groupedByCategory ? (
             <div className="space-y-8">
-              {Object.entries(groupedByCategory).map(([cat, catTools]) => (
-                <CategorySection
-                  key={cat}
-                  category={cat}
-                  tools={catTools}
-                  onSelectTool={setSelectedTool}
-                  pricingFilter={pricingFilter}
-                />
-              ))}
+              {orderedCategories.map(cat => {
+                const catTools = groupedByCategory[cat];
+                if (!catTools || catTools.length === 0) return null;
+                return (
+                  <CategorySection
+                    key={cat}
+                    category={cat}
+                    tools={catTools}
+                    onSelectTool={setSelectedTool}
+                    pricingFilter={pricingFilter}
+                  />
+                );
+              })}
               {Object.keys(groupedByCategory).length === 0 && !isLoading && (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
                   <span className="text-2xl font-mono text-muted-foreground/30">∅</span>
