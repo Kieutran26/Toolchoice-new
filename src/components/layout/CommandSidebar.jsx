@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, ChevronRight, Heart, Shield, Percent, Sparkles } from 'lucide-react';
+import { Search, ChevronRight, Shield, Percent, Sparkles } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { buildCategoryOptions } from "@/lib/tool-categories";
-import DonationModal from './DonationModal';
 
 export default function CommandSidebar({ activeCategory, onCategoryChange, searchQuery, onSearchChange, categoryCounts, isMobileOpen, onMobileClose }) {
-  const [isDonateOpen, setIsDonateOpen] = useState(false);
   const categories = buildCategoryOptions(categoryCounts);
   const location = useLocation();
   const isDealsActive = location.pathname.startsWith('/deals');
@@ -102,22 +100,28 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
           </Link>
         </nav>
 
-        <div className="px-3 py-3 border-t border-border space-y-2">
-          <button 
-            onClick={() => setIsDonateOpen(true)}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded text-xs font-mono font-bold custom-primary-button transition-all duration-200"
+        <div className="px-3 py-3 border-t border-border space-y-2 flex flex-col items-center justify-center">
+          <a 
+            href="https://unikorn.vn/p/toolchoice?ref=embed-toolchoice" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block w-full transition-transform hover:scale-[1.02] duration-200"
           >
-            <Heart className="w-3.5 h-3.5 fill-current text-white animate-pulse" />
-            DONATE
-          </button>
+            <img 
+              src="https://unikorn.vn/api/widgets/badge/toolchoice?theme=light" 
+              alt="ToolChoice trên Unikorn.vn" 
+              style={{ width: '100%', height: 'auto', maxWidth: '180px' }}
+              width="256" 
+              height="64"
+              className="mx-auto block"
+            />
+          </a>
 
-          <p className="text-[10px] font-mono text-muted-foreground/40 text-center tracking-wider">
+          <p className="text-[10px] font-mono text-muted-foreground/40 text-center tracking-wider w-full">
             SYS::NEURAL_INDEX // 2026
           </p>
         </div>
       </aside>
-
-      <DonationModal isOpen={isDonateOpen} onClose={() => setIsDonateOpen(false)} />
     </>
   );
 }
