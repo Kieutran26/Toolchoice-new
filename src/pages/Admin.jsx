@@ -226,7 +226,7 @@ export default function Admin() {
   // Query tools
   const { data: tools = [], isLoading, error, refetch } = useQuery({
     queryKey: ['supabase-tools', 'all'],
-    queryFn: () => listTools(200),
+    queryFn: () => listTools(1000),
   });
 
   // State management

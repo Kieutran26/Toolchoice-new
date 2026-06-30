@@ -21,7 +21,7 @@ export default function CategoryPage() {
 
   const { data: tools = [], isLoading, error } = useQuery({
     queryKey: ['supabase-tools', 'all'],
-    queryFn: () => listTools(200),
+    queryFn: () => listTools(1000),
   });
 
   const categoryCounts = useMemo(() => {
@@ -85,6 +85,7 @@ export default function CategoryPage() {
         categoryCounts={categoryCounts}
         isMobileOpen={isMobileOpen}
         onMobileClose={() => setIsMobileOpen(false)}
+        onSelectTool={setSelectedTool}
       />
 
       <div className="lg:ml-64 min-h-screen flex flex-col">

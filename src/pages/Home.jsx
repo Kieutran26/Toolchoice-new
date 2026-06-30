@@ -26,7 +26,7 @@ export default function Home() {
 
   const { data: tools = [], isLoading, error } = useQuery({
     queryKey: ['supabase-tools', 'all'],
-    queryFn: () => listTools(200),
+    queryFn: () => listTools(1000),
   });
 
   // Category counts
@@ -93,6 +93,7 @@ export default function Home() {
         categoryCounts={categoryCounts}
         isMobileOpen={isMobileOpen}
         onMobileClose={() => setIsMobileOpen(false)}
+        onSelectTool={setSelectedTool}
       />
 
       {/* Main Content */}

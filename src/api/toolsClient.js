@@ -119,7 +119,7 @@ export async function listTools(limit = 200) {
   }
 
   const tools = await response.json();
-  return tools.map(normalizeTool);
+  return tools.map(normalizeTool).filter(t => t.id !== 168);
 }
 
 export async function createTool(toolData) {

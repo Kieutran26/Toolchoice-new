@@ -1,14 +1,59 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, ChevronRight, Shield, Percent, Sparkles } from 'lucide-react';
+import { Search, ChevronRight, Shield, Percent, Sparkles, Shuffle } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { buildCategoryOptions } from "@/lib/tool-categories";
+import { useQuery } from '@tanstack/react-query';
+import { listTools } from '@/api/toolsClient';
 
-export default function CommandSidebar({ activeCategory, onCategoryChange, searchQuery, onSearchChange, categoryCounts, isMobileOpen, onMobileClose }) {
+export default function CommandSidebar({ activeCategory, onCategoryChange, searchQuery, onSearchChange, categoryCounts, isMobileOpen, onMobileClose, onSelectTool }) {
   const categories = buildCategoryOptions(categoryCounts);
   const location = useLocation();
   const isDealsActive = location.pathname.startsWith('/deals');
+
+  const { data: tools = [] } = useQuery({
+    queryKey: ['supabase-tools', 'all'],
+    queryFn: () => listTools(1000),
+  });
+
+  const handleRandomSelect = () => {
+    if (!tools || tools.length === 0) return;
+
+    let visitedIds = [];
+    try {
+      const stored = localStorage.getItem('toolchoice_visited_ids');
+      if (stored) {
+        visitedIds = JSON.parse(stored);
+        if (!Array.isArray(visitedIds)) {
+          visitedIds = [];
+        }
+      }
+    } catch (e) {
+      console.error("Error reading localStorage:", e);
+    }
+
+    let availableTools = tools.filter(t => !visitedIds.includes(t.id));
+
+    if (availableTools.length === 0) {
+      visitedIds = [];
+      availableTools = tools;
+    }
+
+    const randomIndex = Math.floor(Math.random() * availableTools.length);
+    const chosenTool = availableTools[randomIndex];
+
+    if (chosenTool) {
+      visitedIds.push(chosenTool.id);
+      try {
+        localStorage.setItem('toolchoice_visited_ids', JSON.stringify(visitedIds));
+      } catch (e) {
+        console.error("Error writing localStorage:", e);
+      }
+
+      onSelectTool?.(chosenTool);
+    }
+  };
 
   return (
     <>
@@ -100,7 +145,16 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
           </Link>
         </nav>
 
-        <div className="px-3 py-3 border-t border-border space-y-2 flex flex-col items-center justify-center">
+        <div className="px-3 py-3 border-t border-border space-y-3 flex flex-col">
+          <button
+            onClick={handleRandomSelect}
+            disabled={tools.length === 0}
+            className="w-full flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded text-[10px] font-mono font-bold tracking-wider custom-primary-button transition-all duration-300 active:scale-95 shadow-sm group disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Shuffle className="w-3 h-3 text-white transition-transform duration-500 group-hover:rotate-180" />
+            RANDOM TOOL
+          </button>
+
           <a 
             href="https://unikorn.vn/p/toolchoice?ref=embed-toolchoice" 
             target="_blank" 
@@ -116,10 +170,6 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
               className="mx-auto block"
             />
           </a>
-
-          <p className="text-[10px] font-mono text-muted-foreground/40 text-center tracking-wider w-full">
-            SYS::NEURAL_INDEX // 2026
-          </p>
         </div>
       </aside>
     </>

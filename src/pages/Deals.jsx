@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { listTools } from '@/api/toolsClient';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, Menu, Percent, Copy, Check, ExternalLink, Gift, CheckCircle2, Tag, X } from 'lucide-react';
@@ -8,15 +8,17 @@ import CommandSidebar from '@/components/layout/CommandSidebar';
 import ThemeToggle from '@/components/layout/ThemeToggle';
 import ToolDetailDrawer from '@/components/tools/ToolDetailDrawer';
 import { cn } from '@/lib/utils';
+import { categoryToSlug } from '@/lib/tool-categories';
 
 export default function Deals() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTool, setSelectedTool] = useState(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const { data: tools = [], isLoading, error } = useQuery({
     queryKey: ['supabase-tools', 'all'],
-    queryFn: () => listTools(200),
+    queryFn: () => listTools(1000),
   });
 
   const categoryCounts = useMemo(() => {
@@ -35,12 +37,20 @@ export default function Deals() {
     <div className="min-h-screen bg-background">
       <CommandSidebar
         activeCategory="deals"
-        onCategoryChange={() => {}}
+        onCategoryChange={(nextCategory) => {
+          if (nextCategory === 'all') {
+            navigate('/');
+          } else {
+            const catSlug = categoryToSlug(nextCategory);
+            navigate(`/category/${catSlug}`);
+          }
+        }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         categoryCounts={categoryCounts}
         isMobileOpen={isMobileOpen}
         onMobileClose={() => setIsMobileOpen(false)}
+        onSelectTool={setSelectedTool}
       />
 
       <div className="lg:ml-64 min-h-screen flex flex-col">
