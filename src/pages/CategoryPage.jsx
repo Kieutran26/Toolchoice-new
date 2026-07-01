@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { listTools } from '@/api/toolsClient';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Menu } from 'lucide-react';
+import { ArrowLeft, Menu, Search } from 'lucide-react';
 import CommandSidebar from '@/components/layout/CommandSidebar';
 import DataTicker from '@/components/layout/DataTicker';
 import ToolGrid from '@/components/tools/ToolGrid';
@@ -45,7 +45,7 @@ export default function CategoryPage() {
   const pricingFilter = slugToPricing(pricingParam);
 
   const filteredTools = useMemo(() => {
-    let result = tools.filter(t => t.categories?.includes(category));
+    let result = searchQuery.trim() ? tools : tools.filter(t => t.categories?.includes(category));
     if (pricingFilter) result = result.filter(t => t.pricing === pricingFilter);
     if (searchQuery.trim()) {
       const q = removeVietnameseTones(searchQuery);
@@ -54,8 +54,8 @@ export default function CategoryPage() {
     return result;
   }, [tools, category, pricingFilter, searchQuery]);
 
-  const label = getCategoryLabel(category);
-  const Icon = getCategoryIcon(category);
+  const label = searchQuery.trim() ? `Tìm kiếm: "${searchQuery}"` : getCategoryLabel(category);
+  const Icon = searchQuery.trim() ? Search : getCategoryIcon(category);
 
   const handlePricingChange = (newPricing) => {
     if (!newPricing) {

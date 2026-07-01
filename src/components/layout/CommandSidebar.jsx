@@ -67,12 +67,16 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="px-4 py-5 border-b border-border">
-          <div className="flex items-center gap-2.5">
+          <Link
+            to="/"
+            onClick={() => onMobileClose?.()}
+            className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+          >
             <img src="/logo.png" alt="Toolchoice" className="w-8 h-8 rounded" />
             <div>
               <h1 className="text-sm font-bold tracking-wider text-foreground font-mono">TOOLCHOICE</h1>
             </div>
-          </div>
+          </Link>
         </div>
 
         <div className="px-3 py-3 border-b border-border">
