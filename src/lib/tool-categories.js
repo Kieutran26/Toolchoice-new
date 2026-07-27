@@ -73,13 +73,13 @@ export function slugToCategory(slug = '', availableCategories = []) {
 }
 
 const PRICING_TO_SLUG_MAP = {
-  'free': 'mieng-phi',
+  'free': 'mien-phi',
   'freemium': 'free-trial',
   'paid': 'tra-phi'
 };
 
 const SLUG_TO_PRICING_MAP = {
-  'mieng-phi': 'free',
+  'mien-phi': 'free',
   'free': 'free',
   'free-trial': 'freemium',
   'freemium': 'freemium',
