@@ -1,8 +1,38 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import ToolCard from './ToolCard';
 import { Skeleton } from "@/components/ui/skeleton";
 
+const BATCH_SIZE = 30;
+
 export default function ToolGrid({ tools, isLoading, onSelectTool, activePricingFilter }) {
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const sentinelRef = useRef(null);
+
+  // Reset the batch size whenever the underlying tool list changes (new search/filter/category).
+  useEffect(() => {
+    setVisibleCount(BATCH_SIZE);
+  }, [tools]);
+
+  const hasMore = visibleCount < tools.length;
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => prev + BATCH_SIZE);
+        }
+      },
+      { rootMargin: '400px' }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore]);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
@@ -40,16 +70,32 @@ export default function ToolGrid({ tools, isLoading, onSelectTool, activePricing
     );
   }
 
+  const visibleTools = tools.slice(0, visibleCount);
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
-      {tools.map((tool) => (
-        <ToolCard
-          key={tool.id}
-          tool={tool}
-          onSelect={onSelectTool}
-          dimmed={activePricingFilter && tool.pricing !== activePricingFilter}
-        />
-      ))}
+    <div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
+        {visibleTools.map((tool) => (
+          <ToolCard
+            key={tool.id}
+            tool={tool}
+            onSelect={onSelectTool}
+            dimmed={activePricingFilter && tool.pricing !== activePricingFilter}
+          />
+        ))}
+      </div>
+
+      {hasMore && (
+        <div ref={sentinelRef} className="flex justify-center pt-6">
+          <button
+            onClick={() => setVisibleCount((prev) => prev + BATCH_SIZE)}
+            className="flex items-center gap-1.5 px-4 py-2 rounded text-[10px] font-mono font-bold tracking-wider text-muted-foreground hover:text-foreground border border-border hover:border-primary/30 bg-secondary/30 hover:bg-accent transition-all duration-200"
+          >
+            XEM THÊM
+            <ChevronDown className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

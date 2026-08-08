@@ -174,7 +174,7 @@ function DealCard({ tool, onSelect }) {
       <div className="flex items-start gap-3">
         <div className="relative w-10 h-10 rounded-lg bg-secondary border border-border overflow-hidden flex-shrink-0 flex items-center justify-center">
           {tool.logo_url ? (
-            <img src={tool.logo_url} alt="" className="absolute inset-0 w-full h-full object-contain bg-secondary" onError={(e) => e.currentTarget.remove()} />
+            <img src={tool.logo_url} alt="" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-contain bg-secondary" onError={(e) => e.currentTarget.remove()} />
           ) : (
             <span className="text-base font-bold font-mono text-primary">{tool.name?.[0]}</span>
           )}

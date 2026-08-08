@@ -19,6 +19,8 @@ export default function ToolCard({ tool, onSelect, dimmed }) {
           <img
             src={tool.feature_image_url}
             alt={tool.name}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
@@ -88,6 +90,8 @@ function ToolLogo({ tool }) {
         <img
           src={tool.logo_url}
           alt=""
+          loading="lazy"
+          decoding="async"
           className="absolute inset-0 w-full h-full object-contain bg-secondary"
           onError={(event) => {
             event.currentTarget.remove();

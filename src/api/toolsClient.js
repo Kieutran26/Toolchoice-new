@@ -221,6 +221,7 @@ export async function uploadImage(file, bucket = 'tools') {
       apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       'Content-Type': file.type,
+      'Cache-Control': 'public, max-age=31536000, immutable',
     },
     body: file,
   });

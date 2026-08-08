@@ -50,7 +50,7 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
               {/* Hero Image */}
               <div className="relative aspect-video w-full scanline-overlay">
                 {tool.feature_image_url ? (
-                  <img src={tool.feature_image_url} alt={tool.name} className="w-full h-full object-cover" />
+                  <img src={tool.feature_image_url} alt={tool.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-secondary to-accent flex items-center justify-center">
                     <span className="text-6xl font-bold text-muted-foreground/10 font-mono">{tool.name?.[0]}</span>
@@ -174,6 +174,8 @@ function ToolLogoLarge({ tool }) {
         <img
           src={tool.logo_url}
           alt=""
+          loading="lazy"
+          decoding="async"
           className="absolute inset-0 w-full h-full object-contain bg-secondary"
           onError={(event) => {
             event.currentTarget.remove();

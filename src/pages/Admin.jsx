@@ -733,9 +733,11 @@ export default function Admin() {
                         <div className="flex items-center gap-3">
                           <div className="relative w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex-shrink-0 overflow-hidden flex items-center justify-center">
                             {tool.logo_url ? (
-                              <img 
-                                src={tool.logo_url} 
-                                alt="" 
+                              <img
+                                src={tool.logo_url}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
                                 className="w-full h-full object-contain"
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
