@@ -1,5 +1,7 @@
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://rwphopolciuwrmmzztpm.supabase.co';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3cGhvcG9sY2l1d3JtbXp6dHBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwODYxNDcsImV4cCI6MjA3ODY2MjE0N30._O7Q0NsrEXNDcUbc_xBJwpt_FDBIkiiwErxXFWyJCro';
+const R2_UPLOAD_PROXY_URL = import.meta.env.VITE_R2_UPLOAD_PROXY_URL;
+const R2_UPLOAD_TOKEN = import.meta.env.VITE_R2_UPLOAD_TOKEN;
 
 const TOOL_COLUMNS = [
   'id',
@@ -204,32 +206,26 @@ export async function deleteTool(id) {
   return true;
 }
 
-export async function uploadImage(file, bucket = 'tools') {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Missing Supabase environment variables.');
+export async function uploadImage(file) {
+  if (!R2_UPLOAD_PROXY_URL || !R2_UPLOAD_TOKEN) {
+    throw new Error('Missing R2 upload proxy environment variables (VITE_R2_UPLOAD_PROXY_URL / VITE_R2_UPLOAD_TOKEN).');
   }
 
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-  const filePath = `${fileName}`;
-
-  const url = new URL(`/storage/v1/object/${bucket}/${filePath}`, SUPABASE_URL);
-
-  const response = await fetch(url, {
+  const response = await fetch(R2_UPLOAD_PROXY_URL, {
     method: 'POST',
     headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'X-Upload-Token': R2_UPLOAD_TOKEN,
+      'X-Filename': file.name,
       'Content-Type': file.type,
-      'Cache-Control': 'public, max-age=31536000, immutable',
     },
     body: file,
   });
 
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(`Unable to upload image to Supabase Storage: ${response.status} - ${errText}`);
+    throw new Error(`Unable to upload image to R2: ${response.status} - ${errText}`);
   }
 
-  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}`;
+  const { url } = await response.json();
+  return url;
 }

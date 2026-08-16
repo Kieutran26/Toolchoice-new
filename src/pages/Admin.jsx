@@ -67,13 +67,13 @@ function ImageUploadInput({ label, id, name, value, onChange, placeholder, disab
       onChange({ target: { name, value: publicUrl } });
       toast({
         title: 'Tải ảnh lên thành công',
-        description: 'Đã lưu ảnh vào Supabase Storage.',
+        description: 'Đã lưu ảnh vào Cloudflare R2.',
       });
     } catch (err) {
       console.error(err);
       toast({
         title: 'Lỗi tải ảnh lên',
-        description: err.message || 'Không thể upload ảnh. Đảm bảo bucket "tools" đã được tạo và cấp quyền public.',
+        description: err.message || 'Không thể upload ảnh. Kiểm tra cấu hình R2 upload proxy (VITE_R2_UPLOAD_PROXY_URL / VITE_R2_UPLOAD_TOKEN).',
         variant: 'destructive',
       });
     } finally {

@@ -9,7 +9,9 @@
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "migrate:r2": "node scripts/migrate-to-r2.mjs",
+    "migrate:db-urls": "node scripts/update-db-urls.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.31",
@@ -81,6 +83,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@aws-sdk/client-s3": "^3.600.0",
     "@eslint/js": "^9.19.0",
     "@types/node": "^22.13.5",
     "@types/react": "^18.2.66",
