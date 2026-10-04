@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { buildCategoryOptions } from "@/lib/tool-categories";
 import { useQuery } from '@tanstack/react-query';
 import { listTools } from '@/api/toolsClient';
+import NewsletterSubscription from '@/components/newsletter/NewsletterSubscription';
 
 export default function CommandSidebar({ activeCategory, onCategoryChange, searchQuery, onSearchChange, categoryCounts, isMobileOpen, onMobileClose, onSelectTool }) {
   const categories = buildCategoryOptions(categoryCounts);
@@ -131,13 +132,13 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
           </div>
 
           {/* Divider separating Deals from regular categories */}
-          <div className="my-3 border-t border-dashed border-border" />
+          <div className="my-2 border-t border-dashed border-border" />
 
           <Link
             to="/deals"
             onClick={() => onMobileClose?.()}
             className={cn(
-              "relative flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-mono font-bold tracking-[0.15em] overflow-hidden transition-all duration-200 border",
+              "relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-mono font-bold tracking-[0.15em] overflow-hidden transition-all duration-200 border",
               isDealsActive
                 ? "bg-amber-400/15 border-amber-400/50 text-amber-600 dark:text-amber-300 shadow-sm"
                 : "bg-gradient-to-r from-amber-400/10 to-transparent border-amber-400/25 text-amber-600/80 dark:text-amber-300/80 hover:from-amber-400/15 hover:border-amber-400/40"
@@ -147,9 +148,14 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
             <span className="flex-1 text-left">DEALS & ƯU ĐÃI</span>
             <Sparkles className="w-3.5 h-3.5 flex-shrink-0 animate-pulse" />
           </Link>
+
+          {/* Newsletter Subscription */}
+          <div className="mt-2">
+            <NewsletterSubscription variant="sidebar" source="sidebar" />
+          </div>
         </nav>
 
-        <div className="px-3 py-3 border-t border-border space-y-3 flex flex-col">
+        <div className="px-3 py-2.5 border-t border-border space-y-2.5 flex flex-col">
           <button
             onClick={handleRandomSelect}
             disabled={tools.length === 0}

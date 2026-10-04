@@ -11,7 +11,9 @@
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
     "migrate:r2": "node scripts/migrate-to-r2.mjs",
-    "migrate:db-urls": "node scripts/update-db-urls.mjs"
+    "migrate:db-urls": "node scripts/update-db-urls.mjs",
+    "newsletter:preview": "node scripts/send-weekly-newsletter.mjs --preview",
+    "newsletter:send": "node scripts/send-weekly-newsletter.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.31",

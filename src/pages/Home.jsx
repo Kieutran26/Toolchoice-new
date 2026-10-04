@@ -11,6 +11,7 @@ import PricingFilter from '@/components/tools/PricingFilter';
 import ThemeToggle from '@/components/layout/ThemeToggle';
 import { removeVietnameseTones } from '@/lib/utils';
 import { slugToPricing, pricingToSlug, categoryToSlug } from '@/lib/tool-categories';
+import NewsletterSubscription from '@/components/newsletter/NewsletterSubscription';
 
 export default function Home() {
   const { pricing: pricingParam } = useParams();
@@ -122,12 +123,17 @@ export default function Home() {
               <p className="text-sm text-muted-foreground mt-2">{error.message}</p>
             </div>
           ) : (
-            <ToolGrid
-              tools={filteredTools}
-              isLoading={isLoading}
-              onSelectTool={setSelectedTool}
-              activePricingFilter={pricingFilter}
-            />
+            <>
+              <ToolGrid
+                tools={filteredTools}
+                isLoading={isLoading}
+                onSelectTool={setSelectedTool}
+                activePricingFilter={pricingFilter}
+              />
+              <div className="mt-10">
+                <NewsletterSubscription variant="banner" source="home_footer" />
+              </div>
+            </>
           )}
         </div>
 
