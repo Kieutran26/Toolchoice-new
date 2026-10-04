@@ -2,8 +2,8 @@ name: Send Weekly 8-Tools Newsletter
 
 on:
   schedule:
-    # Chạy tự động vào 08:00 sáng Thứ Hai hàng tuần theo giờ Việt Nam (01:00 UTC)
-    - cron: '0 1 * * 1'
+    # Chạy tự động vào 11:00 trưa Thứ Hai hàng tuần theo giờ Việt Nam (04:00 UTC)
+    - cron: '0 4 * * 1'
   workflow_dispatch: # Cho phép bấm nút chạy thử nghiệm thủ công bất kỳ lúc nào trên GitHub
 
 jobs:
