@@ -8,6 +8,12 @@ import { cn } from "@/lib/utils";
 import { getCategoryLabel } from "@/lib/tool-categories";
 
 export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
+  const [imgError, setImgError] = React.useState(false);
+
+  React.useEffect(() => {
+    setImgError(false);
+  }, [tool?.id]);
+
   if (!tool) return null;
 
   return (
@@ -49,11 +55,19 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
             <div className="flex-1 overflow-y-auto">
               {/* Hero Image */}
               <div className="relative aspect-video w-full scanline-overlay">
-                {tool.feature_image_url ? (
-                  <img src={tool.feature_image_url} alt={tool.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                {tool.feature_image_url && !imgError ? (
+                  <img
+                    src={tool.feature_image_url}
+                    alt={tool.name}
+                    loading="lazy"
+                    decoding="async"
+                    onError={() => setImgError(true)}
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-secondary to-accent flex items-center justify-center">
-                    <span className="text-6xl font-bold text-muted-foreground/10 font-mono">{tool.name?.[0]}</span>
+                  <div className="w-full h-full bg-gradient-to-br from-secondary via-accent/30 to-secondary flex flex-col items-center justify-center">
+                    <span className="text-6xl font-bold text-muted-foreground/20 font-mono">{tool.name?.[0]?.toUpperCase()}</span>
+                    <span className="text-xs font-mono text-muted-foreground/50 tracking-widest mt-2 uppercase">{tool.name}</span>
                   </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />

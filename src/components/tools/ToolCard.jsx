@@ -5,6 +5,8 @@ import { cn } from "@/lib/utils";
 import { getCategoryLabel } from "@/lib/tool-categories";
 
 export default function ToolCard({ tool, onSelect, dimmed }) {
+  const [imgError, setImgError] = React.useState(false);
+
   return (
     <div
       onClick={() => onSelect(tool)}
@@ -15,17 +17,19 @@ export default function ToolCard({ tool, onSelect, dimmed }) {
     >
       {/* Feature Image */}
       <div className="relative aspect-video overflow-hidden rounded-t scanline-overlay">
-        {tool.feature_image_url ? (
+        {tool.feature_image_url && !imgError ? (
           <img
             src={tool.feature_image_url}
             alt={tool.name}
             loading="lazy"
             decoding="async"
+            onError={() => setImgError(true)}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-secondary to-accent flex items-center justify-center">
-            <span className="text-3xl font-bold text-muted-foreground/20 font-mono">{tool.name?.[0]}</span>
+          <div className="w-full h-full bg-gradient-to-br from-secondary via-accent/30 to-secondary flex flex-col items-center justify-center p-4">
+            <span className="text-3xl font-bold text-muted-foreground/30 font-mono tracking-wider">{tool.name?.[0]?.toUpperCase()}</span>
+            <span className="text-[11px] font-mono text-muted-foreground/50 tracking-widest mt-1 uppercase truncate max-w-[80%]">{tool.name}</span>
           </div>
         )}
         {/* Hover overlay */}
