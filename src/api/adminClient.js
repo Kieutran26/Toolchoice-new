@@ -1,4 +1,4 @@
-const API_URL = (import.meta.env.VITE_ADMIN_API_URL || '').replace(/\/$/, '');
+const API_URL = (String(import.meta.env.VITE_ADMIN_API_URL || '').trim() || 'https://toolchoice-admin-api.nguyenngockieutran.workers.dev').replace(/\/$/, '');
 const SESSION_KEY = 'toolchoice_admin_session';
 
 export function getAdminSession() {

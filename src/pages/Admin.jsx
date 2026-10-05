@@ -524,7 +524,6 @@ export default function Admin() {
               <Input
                 id="login_email"
                 type="email"
-                placeholder="admin@domain.com"
                 value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
                 className="bg-slate-900/60 border-slate-800 h-11 text-sm focus-visible:ring-primary focus-visible:border-primary text-slate-200"
@@ -537,7 +536,6 @@ export default function Admin() {
               <Input
                 id="login_password"
                 type="password"
-                placeholder="••••••••"
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
                 className="bg-slate-900/60 border-slate-800 h-11 text-sm focus-visible:ring-primary focus-visible:border-primary text-slate-200"
