@@ -34,6 +34,8 @@ Open [Base44.com](http://Base44.com) and click on Publish.
 
 **Docs & Support**
 
+Toolchoice admin: [Hướng dẫn quản trị và cấu hình AI](docs/admin-guide.md).
+
 Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
 
 Support: [https://app.base44.com/support](https://app.base44.com/support)

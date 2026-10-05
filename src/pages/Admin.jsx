@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { listTools, createTool, updateTool, deleteTool, uploadImage } from '@/api/toolsClient';
+import { listAdminTools, createTool, updateTool, deleteTool, uploadImage } from '@/api/toolsClient';
 import { cn } from "@/lib/utils";
 import { useToast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
-  Plus, Edit2, Trash2, Globe, Search, RefreshCw, LogOut, Check, X, 
-  Tag, FileText, Link2, Image, AlertCircle, LayoutGrid, CheckSquare, 
-  Sparkles, Key, CheckCircle, ArrowLeft, ArrowUpRight, Loader2, Info, Shield
+  Plus, Edit2, Trash2, Search, RefreshCw, LogOut, Check, X,
+  Image, AlertCircle, LayoutGrid,
+  Sparkles, CheckCircle, ArrowLeft, ArrowUpRight, Loader2, Shield
 } from 'lucide-react';
 
 const AVAILABLE_CATEGORIES = [
@@ -28,6 +28,15 @@ const AVAILABLE_CATEGORIES = [
   'SEO & Analytics'
 ];
 
+import { loginAdmin, logoutAdmin } from '@/api/adminClient';
+import useAdminSession from '@/components/admin/use-admin-session';
+import QuickToolIntake from '@/components/admin/QuickToolIntake';
+import ImageHealthPanel from '@/components/admin/ImageHealthPanel';
+import ReferralFields from '@/components/admin/ReferralFields';
+import { parseReferral } from '@/lib/tool-intake';
+import { pasteImage } from '@/lib/clipboard-image';
+import ImagePasteTarget from '@/components/admin/ImagePasteTarget';
+
 const INITIAL_FORM_STATE = {
   name: '',
   tagline: '',
@@ -37,6 +46,11 @@ const INITIAL_FORM_STATE = {
   logo_url: '',
   gallery_images: '',
   referral_offer: '',
+  referral_code: '',
+  referral_parameter: '',
+  promotion_code: '',
+  promotion_description: '',
+  has_promotion: false,
   pros: '',
   is_featured: false,
   is_best_choice: false,
@@ -44,14 +58,14 @@ const INITIAL_FORM_STATE = {
   categories: [],
 };
 
-function ImageUploadInput({ label, id, name, value, onChange, placeholder, disabled }) {
+function ImageUploadInput({ label, id, name, value, onChange, placeholder, disabled, onBusyChange }) {
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = React.useRef(null);
   const { toast } = useToast();
 
   const handleFile = async (file) => {
-    if (!file) return;
+    if (!file || disabled || isUploading) return;
     if (!file.type.startsWith('image/')) {
       toast({
         title: 'Lỗi định dạng',
@@ -62,6 +76,7 @@ function ImageUploadInput({ label, id, name, value, onChange, placeholder, disab
     }
 
     setIsUploading(true);
+    onBusyChange?.(true);
     try {
       const publicUrl = await uploadImage(file);
       onChange({ target: { name, value: publicUrl } });
@@ -73,11 +88,12 @@ function ImageUploadInput({ label, id, name, value, onChange, placeholder, disab
       console.error(err);
       toast({
         title: 'Lỗi tải ảnh lên',
-        description: err.message || 'Không thể upload ảnh. Kiểm tra cấu hình R2 upload proxy (VITE_R2_UPLOAD_PROXY_URL / VITE_R2_UPLOAD_TOKEN).',
+        description: err.message || 'Không thể upload ảnh. Kiểm tra đăng nhập và cấu hình API admin.',
         variant: 'destructive',
       });
     } finally {
       setIsUploading(false);
+      onBusyChange?.(false);
     }
   };
 
@@ -133,8 +149,9 @@ function ImageUploadInput({ label, id, name, value, onChange, placeholder, disab
         onDragOver={handleDrag}
         onDragLeave={handleDrag}
         onDrop={handleDrop}
+        onPaste={event => pasteImage(event, handleFile, disabled || isUploading)}
       >
-        <div className="flex flex-col sm:flex-row gap-2 items-center">
+        <div className="flex flex-col gap-2">
           {/* URL Input */}
           <div className="flex-1 w-full relative">
             <Input 
@@ -156,7 +173,8 @@ function ImageUploadInput({ label, id, name, value, onChange, placeholder, disab
           </div>
 
           {/* Upload Button */}
-          <div className="flex items-center gap-2 px-2 pb-1 sm:pb-0">
+          <div className="flex flex-wrap items-center gap-2 px-2 pb-1">
+            <ImagePasteTarget label={label} onImage={handleFile} disabled={disabled || isUploading} />
             <input 
               type="file"
               ref={fileInputRef}
@@ -179,7 +197,7 @@ function ImageUploadInput({ label, id, name, value, onChange, placeholder, disab
 
         {/* Small drop indicator text */}
         <div className="px-3 pb-1.5 pt-0.5 text-[9px] font-mono text-slate-500 flex items-center gap-1.5">
-          <span>{dragActive ? "DROP FILE HERE" : "Drag & drop file to upload to Supabase"}</span>
+          <span>{dragActive ? "DROP FILE HERE" : "Kéo thả hoặc dán ảnh bằng Ctrl+V vào ô ảnh"}</span>
         </div>
       </div>
 
@@ -187,6 +205,7 @@ function ImageUploadInput({ label, id, name, value, onChange, placeholder, disab
       {value && (
         <div className="relative mt-2 w-full max-h-24 rounded-lg bg-slate-900 border border-slate-800/60 overflow-hidden flex items-center justify-center p-2 group">
           <img 
+            key={value}
             src={value} 
             alt="Preview" 
             className="max-h-20 max-w-full object-contain rounded"
@@ -199,6 +218,7 @@ function ImageUploadInput({ label, id, name, value, onChange, placeholder, disab
             onClick={() => onChange({ target: { name, value: '' } })}
             className="absolute top-1.5 right-1.5 p-1 rounded-full bg-slate-950/80 border border-slate-800 text-slate-400 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity"
             title="Xóa ảnh"
+            disabled={disabled || isUploading}
           >
             <X className="w-3 h-3" />
           </button>
@@ -214,19 +234,24 @@ export default function Admin() {
   const { toast } = useToast();
 
   // Admin authentication state
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => localStorage.getItem('admin_authenticated') === 'true');
+  const [adminSession, setAdminSession] = useAdminSession();
+  const isAdminLoggedIn = Boolean(adminSession);
+  const [aiBusy, setIntakeBusy] = useState(false);
+  const [mediaBusy, setMediaBusy] = useState({});
+  const intakeBusy = aiBusy || Object.values(mediaBusy).some(Boolean);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // @ts-ignore
-  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@toolchoice.vn';
+  const adminEmail = adminSession?.email || '';
 
   // Query tools
   const { data: tools = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['supabase-tools', 'all'],
-    queryFn: () => listTools(1000),
+    queryKey: ['admin-tools'],
+    queryFn: listAdminTools,
+    enabled: isAdminLoggedIn,
   });
 
   // State management
@@ -250,43 +275,28 @@ export default function Admin() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Authentication handlers
-  const handleAdminLogin = (e) => {
+  const handleAdminLogin = async (e) => {
     e.preventDefault();
     setLoginError('');
     setIsLoggingIn(true);
-
     try {
-      // @ts-ignore
-      const secretEmail = import.meta.env.VITE_ADMIN_EMAIL || 'admin@toolchoice.vn';
-      // @ts-ignore
-      const secretPassword = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
-
-      if (loginEmail.trim() === secretEmail && loginPassword === secretPassword) {
-        localStorage.setItem('admin_authenticated', 'true');
-        setIsAdminLoggedIn(true);
-        toast({
-          title: 'Đăng nhập thành công',
-          description: 'Chào mừng trở lại, admin!',
-        });
-      } else {
-        setLoginError('Email hoặc mật khẩu admin không chính xác');
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setLoginError('Lỗi hệ thống: ' + err.message);
-    } finally {
-      setIsLoggingIn(false);
-    }
+      const session = await loginAdmin(loginEmail, loginPassword);
+      setAdminSession(session);
+      setLoginPassword('');
+      toast({ title: 'Đăng nhập thành công', description: 'Chào mừng trở lại!' });
+    } catch (err) { setLoginError(err.message); }
+    finally { setIsLoggingIn(false); }
   };
 
-  const handleAdminLogout = () => {
-    localStorage.removeItem('admin_authenticated');
-    setIsAdminLoggedIn(false);
-    toast({
-      title: 'Đã đăng xuất',
-      description: 'Hệ thống đã khóa truy cập admin.',
-      variant: 'default',
-    });
+  const handleAdminLogout = async () => {
+    try { await logoutAdmin(); }
+    catch (err) { toast({ title: 'Đã xóa phiên trên trình duyệt', description: err.message, variant: 'destructive' }); }
+    finally { setAdminSession(null); }
+  };
+
+  const refreshTools = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-tools'] });
+    queryClient.invalidateQueries({ queryKey: ['supabase-tools'] });
   };
 
   // Stats calculation
@@ -335,6 +345,11 @@ export default function Admin() {
       logo_url: tool.logo_url || '',
       gallery_images: tool.raw_gallery_images || '',
       referral_offer: tool.raw_referral_offer || '',
+      referral_code: tool.raw_referral_code || '',
+      referral_parameter: tool.raw_referral_parameter || '',
+      promotion_code: tool.promotion_code || '',
+      promotion_description: tool.promotion_description || '',
+      has_promotion: tool.has_promotion || false,
       pros: tool.raw_pros || '',
       is_featured: tool.raw_is_featured || false,
       is_best_choice: tool.raw_is_best_choice || false,
@@ -361,13 +376,18 @@ export default function Admin() {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
+      ...(name === 'link' ? parseReferral(value) : {})
     }));
   };
 
   // Form Validation
   const validateForm = () => {
     const errors = { name: '', tagline: '', link: '', categories: '' };
+    if (formData.pricing_type === 'Unknown') {
+      toast({ title: 'Cần xác nhận giá', description: 'AI chưa tìm thấy thông tin giá. Chọn hình thức thanh toán trước khi lưu.', variant: 'destructive' });
+      return false;
+    }
     if (!formData.name.trim()) errors.name = 'Tên công cụ là bắt buộc';
     if (!formData.link.trim()) errors.link = 'Website URL là bắt buộc';
     else if (!/^https?:\/\/.+/.test(formData.link.trim())) {
@@ -384,7 +404,7 @@ export default function Admin() {
   // Save tool (insert or update)
   const handleSaveTool = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (intakeBusy || !validateForm()) return;
 
     setIsSaving(true);
     try {
@@ -398,6 +418,11 @@ export default function Admin() {
         logo_url: formData.logo_url.trim() || null,
         gallery_images: formData.gallery_images.trim() || null,
         referral_offer: formData.referral_offer.trim() || null,
+        referral_code: formData.referral_code.trim() || null,
+        referral_parameter: formData.referral_parameter.trim() || null,
+        promotion_code: formData.promotion_code.trim() || null,
+        promotion_description: formData.promotion_description.trim() || null,
+        has_promotion: formData.has_promotion,
         pros: formData.pros.trim() || null,
         is_featured: formData.is_featured,
         is_best_choice: formData.is_best_choice,
@@ -424,7 +449,7 @@ export default function Admin() {
       }
 
       setIsFormOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['supabase-tools'] });
+      refreshTools();
     } catch (err) {
       toast({
         title: 'Lỗi lưu thông tin',
@@ -455,7 +480,7 @@ export default function Admin() {
         variant: 'success',
       });
       setIsDeleteConfirmOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['supabase-tools'] });
+      refreshTools();
     } catch (err) {
       toast({
         title: 'Lỗi xóa công cụ',
@@ -589,6 +614,8 @@ export default function Admin() {
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
         
+        <ImageHealthPanel onRepaired={refreshTools} onEditTool={id => { const tool = tools.find(item => item.id === id); if (tool) handleOpenEdit(tool); }} />
+
         {/* Statistics Cards */}
         <section className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700/60 transition-all duration-200">
@@ -863,7 +890,7 @@ export default function Admin() {
           {/* Backdrop */}
           <div 
             className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm transition-opacity duration-300"
-            onClick={() => !isSaving && setIsFormOpen(false)}
+            onClick={() => !isSaving && !intakeBusy && setIsFormOpen(false)}
           />
 
           {/* Drawer content */}
@@ -885,7 +912,7 @@ export default function Admin() {
               </div>
               <button 
                 onClick={() => setIsFormOpen(false)}
-                disabled={isSaving}
+                disabled={isSaving || intakeBusy}
                 className="w-8 h-8 rounded border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-900 transition-colors"
               >
                 <X className="w-4 h-4" />
@@ -895,6 +922,8 @@ export default function Admin() {
             {/* Form Fields - Scrollable */}
             <form onSubmit={handleSaveTool} className="flex-1 overflow-y-auto p-6 space-y-6">
               
+              <QuickToolIntake disabled={isSaving || Object.values(mediaBusy).some(Boolean)} formData={formData} editing={Boolean(selectedToolForEdit)} onChange={handleInputChange} onBusyChange={setIntakeBusy} onDraft={draft => setFormData(prev => ({ ...prev, ...draft, pricing_type: draft.pricing_type === 'Free Trial' ? 'Freemium' : draft.pricing_type }))} />
+
               {/* Tool Identity Section */}
               <div className="space-y-4">
                 <h4 className="text-[11px] font-mono font-bold text-primary tracking-wider border-b border-slate-800/80 pb-1 uppercase">1. Thông tin cơ bản</h4>
@@ -909,7 +938,7 @@ export default function Admin() {
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="e.g. Midjourney"
-                      disabled={isSaving}
+                      disabled={isSaving || intakeBusy}
                       className={`bg-slate-900/60 border-slate-800 text-sm focus-visible:ring-primary focus-visible:border-primary text-slate-200 ${formErrors.name ? 'border-rose-500 focus-visible:ring-rose-500' : ''}`}
                     />
                     {formErrors.name && <p className="text-[10px] text-rose-500 font-mono mt-1">{formErrors.name}</p>}
@@ -924,7 +953,7 @@ export default function Admin() {
                       value={formData.link}
                       onChange={handleInputChange}
                       placeholder="https://example.com"
-                      disabled={isSaving}
+                      disabled={isSaving || intakeBusy}
                       className={`bg-slate-900/60 border-slate-800 text-sm focus-visible:ring-primary focus-visible:border-primary text-slate-200 ${formErrors.link ? 'border-rose-500 focus-visible:ring-rose-500' : ''}`}
                     />
                     {formErrors.link && <p className="text-[10px] text-rose-500 font-mono mt-1">{formErrors.link}</p>}
@@ -940,7 +969,7 @@ export default function Admin() {
                     value={formData.tagline}
                     onChange={handleInputChange}
                     placeholder="Mô tả công cụ trong 1 câu ngắn..."
-                    disabled={isSaving}
+                    disabled={isSaving || intakeBusy}
                     className={`bg-slate-900/60 border-slate-800 text-sm focus-visible:ring-primary focus-visible:border-primary text-slate-200 ${formErrors.tagline ? 'border-rose-500' : ''}`}
                   />
                   {formErrors.tagline && <p className="text-[10px] text-rose-500 font-mono mt-1">{formErrors.tagline}</p>}
@@ -954,7 +983,7 @@ export default function Admin() {
                     value={formData.description}
                     onChange={handleInputChange}
                     placeholder="Mô tả chi tiết tính năng, cách thức hoạt động..."
-                    disabled={isSaving}
+                    disabled={isSaving || intakeBusy}
                     rows={4}
                     className="bg-slate-900/60 border-slate-800 text-sm focus-visible:ring-primary focus-visible:border-primary text-slate-200 resize-y min-h-[100px]"
                   />
@@ -979,7 +1008,7 @@ export default function Admin() {
                           type="checkbox"
                           checked={formData.categories?.includes(category)}
                           onChange={() => handleCategoryCheckboxChange(category)}
-                          disabled={isSaving}
+                          disabled={isSaving || intakeBusy}
                           className="w-3.5 h-3.5 accent-primary rounded bg-slate-950 border-slate-800"
                         />
                         <span className="text-slate-300">{category}</span>
@@ -997,12 +1026,13 @@ export default function Admin() {
                       name="pricing_type"
                       value={formData.pricing_type}
                       onChange={handleInputChange}
-                      disabled={isSaving}
+                      disabled={isSaving || intakeBusy}
                       className="w-full bg-slate-900/60 border border-slate-800 rounded-md h-10 px-3 text-sm text-slate-300 focus:outline-none focus:border-primary/50"
                     >
                       <option value="Free">Miễn Phí (Free)</option>
                       <option value="Freemium">Có Free Trial / Freemium</option>
                       <option value="Paid">Trả Phí (Paid)</option>
+                      <option value="Unknown">Chưa rõ (cần kiểm tra)</option>
                     </select>
                   </div>
 
@@ -1013,7 +1043,7 @@ export default function Admin() {
                       name="status"
                       value={formData.status}
                       onChange={handleInputChange}
-                      disabled={isSaving}
+                      disabled={isSaving || intakeBusy}
                       className="w-full bg-slate-900/60 border border-slate-800 rounded-md h-10 px-3 text-sm text-slate-300 focus:outline-none focus:border-primary/50"
                     >
                       <option value="approved">Approved (Hiển thị ngay)</option>
@@ -1029,23 +1059,25 @@ export default function Admin() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <ImageUploadInput 
-                    label="Logo Image URL"
+                      label="Logo Image URL"
+                      onBusyChange={busy => setMediaBusy(previous => ({ ...previous, logo: busy }))}
                     id="logo_url"
                     name="logo_url"
                     value={formData.logo_url}
                     onChange={handleInputChange}
                     placeholder="https://example.com/logo.png"
-                    disabled={isSaving}
+                    disabled={isSaving || intakeBusy}
                   />
 
                   <ImageUploadInput 
-                    label="Gallery / Feature Image URL"
+                      label="Gallery / Feature Image URL"
+                      onBusyChange={busy => setMediaBusy(previous => ({ ...previous, gallery: busy }))}
                     id="gallery_images"
                     name="gallery_images"
                     value={formData.gallery_images}
                     onChange={handleInputChange}
                     placeholder="https://example.com/cover.png"
-                    disabled={isSaving}
+                    disabled={isSaving || intakeBusy}
                   />
                 </div>
 
@@ -1057,10 +1089,12 @@ export default function Admin() {
                     value={formData.referral_offer}
                     onChange={handleInputChange}
                     placeholder="VD: Bấm vào link để nhận ngay 100 credit"
-                    disabled={isSaving}
+                    disabled={isSaving || intakeBusy}
                     className="bg-slate-900/60 border-slate-800 text-sm focus-visible:ring-primary focus-visible:border-primary text-slate-200"
                   />
                 </div>
+
+                <ReferralFields value={formData} onChange={handleInputChange} disabled={isSaving || intakeBusy} />
 
                 <div className="space-y-2">
                   <label htmlFor="pros" className="text-xs font-semibold text-slate-300">Tính năng nổi bật (Pros - Mỗi tính năng một dòng)</label>
@@ -1070,7 +1104,7 @@ export default function Admin() {
                     value={formData.pros}
                     onChange={handleInputChange}
                     placeholder="Mỗi tính năng là một dòng mới&#10;Giao diện thân thiện&#10;Tạo ảnh nhanh trong 10 giây&#10;Hỗ trợ xuất file độ phân giải cao"
-                    disabled={isSaving}
+                    disabled={isSaving || intakeBusy}
                     rows={3}
                     className="bg-slate-900/60 border-slate-800 text-sm focus-visible:ring-primary focus-visible:border-primary text-slate-200 resize-y"
                   />
@@ -1088,7 +1122,7 @@ export default function Admin() {
                       name="is_featured"
                       checked={formData.is_featured}
                       onChange={handleInputChange}
-                      disabled={isSaving}
+                      disabled={isSaving || intakeBusy}
                       className="mt-1 w-4 h-4 accent-primary rounded bg-slate-950 border-slate-800"
                     />
                     <div className="space-y-0.5">
@@ -1105,7 +1139,7 @@ export default function Admin() {
                       name="is_best_choice"
                       checked={formData.is_best_choice}
                       onChange={handleInputChange}
-                      disabled={isSaving}
+                      disabled={isSaving || intakeBusy}
                       className="mt-1 w-4 h-4 accent-amber-500 rounded bg-slate-950 border-slate-800"
                     />
                     <div className="space-y-0.5">
@@ -1123,14 +1157,14 @@ export default function Admin() {
               <Button 
                 variant="outline" 
                 onClick={() => setIsFormOpen(false)}
-                disabled={isSaving}
+                disabled={isSaving || intakeBusy}
                 className="text-xs font-mono border-slate-800 text-slate-400 hover:text-white"
               >
                 CANCEL
               </Button>
               <Button 
                 onClick={handleSaveTool}
-                disabled={isSaving}
+                disabled={isSaving || intakeBusy}
                 className="text-xs font-mono font-semibold"
               >
                 {isSaving ? (

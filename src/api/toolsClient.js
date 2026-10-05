@@ -1,7 +1,6 @@
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://rwphopolciuwrmmzztpm.supabase.co';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3cGhvcG9sY2l1d3JtbXp6dHBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwODYxNDcsImV4cCI6MjA3ODY2MjE0N30._O7Q0NsrEXNDcUbc_xBJwpt_FDBIkiiwErxXFWyJCro';
-const R2_UPLOAD_PROXY_URL = import.meta.env.VITE_R2_UPLOAD_PROXY_URL;
-const R2_UPLOAD_TOKEN = import.meta.env.VITE_R2_UPLOAD_TOKEN;
+import { adminJson, adminRequest, uploadAdminImage } from './adminClient';
 
 const TOOL_COLUMNS = [
   'id',
@@ -15,6 +14,8 @@ const TOOL_COLUMNS = [
   'gallery_images',
   'logo_url',
   'referral_offer',
+  'referral_code',
+  'referral_parameter',
   'has_promotion',
   'promotion_code',
   'promotion_description',
@@ -67,7 +68,7 @@ function splitCategories(categoryText) {
   return unique.length > 0 ? unique : ['Khác'];
 }
 
-function normalizeTool(tool) {
+export function normalizeTool(tool) {
   const categories = splitCategories(tool.category_text);
 
   return {
@@ -82,6 +83,8 @@ function normalizeTool(tool) {
     logo_url: tool.logo_url,
     website_url: tool.link,
     referral_offer: tool.referral_offer || '',
+    referral_code: tool.referral_code || '',
+    referral_parameter: tool.referral_parameter || '',
     has_promotion: Boolean(tool.has_promotion),
     promotion_code: tool.promotion_code || '',
     promotion_description: tool.promotion_description || '',
@@ -99,6 +102,8 @@ function normalizeTool(tool) {
     raw_link: tool.link || '',
     raw_gallery_images: tool.gallery_images || '',
     raw_referral_offer: tool.referral_offer || '',
+    raw_referral_code: tool.referral_code || '',
+    raw_referral_parameter: tool.referral_parameter || '',
     raw_is_featured: Boolean(tool.is_featured),
     raw_is_best_choice: Boolean(tool.is_best_choice),
     raw_status: tool.status || 'approved',
@@ -130,108 +135,23 @@ export async function listTools(limit = 200) {
   return tools.map(normalizeTool).filter(t => t.id !== 168);
 }
 
+export async function listAdminTools() {
+  return (await adminRequest('/tools')).map(normalizeTool);
+}
+
 export async function createTool(toolData) {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Missing Supabase environment variables.');
-  }
-
-  const url = new URL('/rest/v1/tools', SUPABASE_URL);
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    },
-    body: JSON.stringify({
-      ...toolData,
-      status: toolData.status || 'approved'
-    }),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Unable to create tool in Supabase: ${response.status} - ${errText}`);
-  }
-
-  const result = await response.json();
-  return result[0] ? normalizeTool(result[0]) : null;
+  return normalizeTool(await adminJson('/tools', { ...toolData, status: toolData.status || 'approved' }));
 }
 
 export async function updateTool(id, toolData) {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Missing Supabase environment variables.');
-  }
-
-  const url = new URL('/rest/v1/tools', SUPABASE_URL);
-  url.searchParams.set('id', `eq.${id}`);
-
-  const response = await fetch(url, {
-    method: 'PATCH',
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=representation'
-    },
-    body: JSON.stringify(toolData),
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Unable to update tool in Supabase: ${response.status} - ${errText}`);
-  }
-
-  const result = await response.json();
-  return result[0] ? normalizeTool(result[0]) : null;
+  return normalizeTool(await adminJson('/tools/' + id, toolData, 'PATCH'));
 }
 
 export async function deleteTool(id) {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Missing Supabase environment variables.');
-  }
-
-  const url = new URL('/rest/v1/tools', SUPABASE_URL);
-  url.searchParams.set('id', `eq.${id}`);
-
-  const response = await fetch(url, {
-    method: 'DELETE',
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    },
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Unable to delete tool from Supabase: ${response.status} - ${errText}`);
-  }
-
+  await adminRequest('/tools/' + id, { method: 'DELETE' });
   return true;
 }
 
 export async function uploadImage(file) {
-  if (!R2_UPLOAD_PROXY_URL || !R2_UPLOAD_TOKEN) {
-    throw new Error('Missing R2 upload proxy environment variables (VITE_R2_UPLOAD_PROXY_URL / VITE_R2_UPLOAD_TOKEN).');
-  }
-
-  const response = await fetch(R2_UPLOAD_PROXY_URL, {
-    method: 'POST',
-    headers: {
-      'X-Upload-Token': R2_UPLOAD_TOKEN,
-      'X-Filename': file.name,
-      'Content-Type': file.type,
-    },
-    body: file,
-  });
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Unable to upload image to R2: ${response.status} - ${errText}`);
-  }
-
-  const { url } = await response.json();
-  return url;
+  return (await uploadAdminImage(file)).url;
 }
