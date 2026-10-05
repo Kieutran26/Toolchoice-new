@@ -1,7 +1,21 @@
-import { Bot, Boxes, Brain, Code2, Github, Layers, Megaphone, Palette, Puzzle, Search, Sparkles, Zap } from 'lucide-react';
+import { Bot, Boxes, Brain, Code2, Github, Layers, Megaphone, Palette, Puzzle, Search, Sparkles, Video as VideoIcon, Zap } from 'lucide-react';
 import { removeVietnameseTones } from './utils';
 
 export const ALL_CATEGORY_ID = 'all';
+
+export const TOP_CATEGORIES = [
+  'Thiết kế',
+  'AI',
+  'Lập trình',
+  'Năng suất',
+  'Marketing',
+  'Repo GitHub',
+  'Khác',
+  'Plugin Figma',
+  'Extension',
+  'Video',
+  'SEO & Analytics'
+];
 
 const CATEGORY_ICON_RULES = [
   { match: ['AI'], icon: Brain },
@@ -12,8 +26,8 @@ const CATEGORY_ICON_RULES = [
   { match: ['Extension'], icon: Puzzle },
   { match: ['Marketing'], icon: Megaphone },
   { match: ['Năng suất'], icon: Zap },
-  { match: ['Video & Audio'], icon: Bot },
-  { match: ['SEO & Analytics'], icon: Search },
+  { match: ['Video'], icon: VideoIcon },
+  { match: ['SEO'], icon: Search },
 ];
 
 export function getCategoryIcon(category = '') {
@@ -28,15 +42,17 @@ export function getCategoryLabel(category = '') {
 const CATEGORY_SLUGS_MAP = {
   'thiet-ke': 'Thiết kế',
   'ai': 'AI',
-  'nang-suat': 'Năng suất',
   'lap-trinh': 'Lập trình',
-  'plugin-figma': 'Plugin Figma',
-  'repo-github': 'Repo GitHub',
+  'nang-suat': 'Năng suất',
   'marketing': 'Marketing',
+  'repo-github': 'Repo GitHub',
+  'khac': 'Khác',
+  'plugin-figma': 'Plugin Figma',
   'extension': 'Extension',
-  'video-audio': 'Video & Audio',
+  'video': 'Video',
+  'video-audio': 'Video',
   'seo-analytics': 'SEO & Analytics',
-  'khac': 'Khác'
+  'seo': 'SEO & Analytics'
 };
 
 export function categoryToSlug(category = '') {
@@ -98,21 +114,9 @@ export function slugToPricing(slug = '') {
 
 export function buildCategoryOptions(categoryCounts = {}) {
   const isLoaded = Object.keys(categoryCounts).length > 0;
-  const keys = isLoaded ? Object.keys(categoryCounts) : [
-    'Thiết kế',
-    'AI',
-    'Năng suất',
-    'Lập trình',
-    'Plugin Figma',
-    'Khác',
-    'Marketing',
-    'Extension',
-    'Video & Audio',
-    'SEO & Analytics',
-    'Repo GitHub'
-  ];
 
-  const categories = keys.map(category => ({
+  // Lọc và chỉ hiển thị đúng 11 danh mục được chọn
+  const categories = TOP_CATEGORIES.map(category => ({
     id: category,
     label: getCategoryLabel(category),
     icon: getCategoryIcon(category),
@@ -120,9 +124,10 @@ export function buildCategoryOptions(categoryCounts = {}) {
   }));
 
   if (isLoaded) {
-    categories.sort((a, b) => b.count - a.count);
+    categories.sort((a, b) => (b.count || 0) - (a.count || 0));
   }
 
+  // Danh sách gồm 'Tất cả công cụ' + 11 danh mục chuyên môn (tổng cộng 12 mục)
   return [
     { id: ALL_CATEGORY_ID, label: 'Tất cả công cụ', icon: Layers, count: null },
     ...categories,

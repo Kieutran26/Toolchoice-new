@@ -17,15 +17,15 @@ import {
 const AVAILABLE_CATEGORIES = [
   'Thiết kế',
   'AI',
-  'Năng suất',
   'Lập trình',
-  'Plugin Figma',
+  'Năng suất',
   'Marketing',
-  'Extension',
-  'Video & Audio',
-  'SEO & Analytics',
   'Repo GitHub',
-  'Khác'
+  'Khác',
+  'Plugin Figma',
+  'Extension',
+  'Video',
+  'SEO & Analytics'
 ];
 
 const INITIAL_FORM_STATE = {

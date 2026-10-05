@@ -55,10 +55,16 @@ function listFromText(text) {
 function splitCategories(categoryText) {
   const categories = String(categoryText || '')
     .split(';')
-    .map((category) => category.trim())
+    .map((category) => {
+      const trimmed = category.trim();
+      if (trimmed === 'SEO') return 'SEO & Analytics';
+      if (trimmed === 'Video & Audio') return 'Video';
+      return trimmed;
+    })
     .filter(Boolean);
 
-  return categories.length > 0 ? categories : ['Khác'];
+  const unique = Array.from(new Set(categories));
+  return unique.length > 0 ? unique : ['Khác'];
 }
 
 function normalizeTool(tool) {
