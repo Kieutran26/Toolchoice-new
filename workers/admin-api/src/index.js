@@ -55,7 +55,10 @@ export default {
       }
       return reply({ error: 'Không tìm thấy chức năng.' }, 404);
     } catch (error) {
-      return reply({ error: error.status ? error.message : 'Không thể hoàn tất yêu cầu. Website hoặc dịch vụ có thể đang lỗi; hãy thử lại hoặc nhập thủ công.' }, error.status || 502);
+      const message = error.message && typeof error.message === 'string'
+        ? error.message
+        : 'Không thể hoàn tất yêu cầu. Website hoặc dịch vụ có thể đang lỗi; hãy thử lại hoặc nhập thủ công.';
+      return reply({ error: message }, error.status || 502);
     }
   },
 };

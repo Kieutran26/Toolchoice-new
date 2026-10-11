@@ -1,14 +1,14 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Sparkles, Loader2, Upload, CheckCircle2, RotateCcw, HelpCircle } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Sparkles, Loader2, Upload, CheckCircle2, RotateCcw, HelpCircle, AlertTriangle, ArrowUpRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { adminJson, uploadAdminImage } from '@/api/adminClient';
-import { parseReferral } from '@/lib/tool-intake';
+import { parseReferral, findDuplicateTool } from '@/lib/tool-intake';
 import { pasteImage } from '@/lib/clipboard-image';
 import ImagePasteTarget from './ImagePasteTarget';
 
-export default function QuickToolIntake({ formData, onChange, onDraft, onBusyChange, editing, disabled }) {
+export default function QuickToolIntake({ formData, onChange, onDraft, onBusyChange, editing, disabled, existingTools = [], currentToolId = null, onSwitchToEdit }) {
   const [auto, setAuto] = useState(!editing);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -21,6 +21,14 @@ export default function QuickToolIntake({ formData, onChange, onDraft, onBusyCha
   latest.current = formData;
   const referral = parseReferral(formData.link);
   const { toast } = useToast();
+
+  const duplicate = useMemo(() => {
+    return findDuplicateTool(
+      existingTools,
+      { name: evidence?.draft?.name || formData.name, link: formData.link },
+      currentToolId
+    );
+  }, [existingTools, formData.name, formData.link, evidence?.draft?.name, currentToolId]);
 
   useEffect(() => () => controller.current?.abort(), []);
 
@@ -49,6 +57,7 @@ export default function QuickToolIntake({ formData, onChange, onDraft, onBusyCha
       }
     } catch (err) {
       if (err.name !== 'AbortError') {
+        attempted.current = '';
         setError(err.message || 'Không thể phân tích website.');
         toast({
           title: 'Lỗi phân tích',
@@ -191,9 +200,63 @@ export default function QuickToolIntake({ formData, onChange, onDraft, onBusyCha
         </p>
       )}
 
+      {duplicate && (
+        <div role="alert" className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 p-3 rounded-lg space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2 font-semibold text-amber-200">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>Phát hiện tool có thể đã tồn tại:</span>
+            </div>
+            {onSwitchToEdit && !editing && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => onSwitchToEdit(duplicate.tool)}
+                className="h-6 text-[11px] px-2 border-amber-500/40 text-amber-300 hover:text-white hover:bg-amber-500/20 shrink-0 font-medium"
+              >
+                Mở sửa tool này
+              </Button>
+            )}
+          </div>
+          <div className="text-[11px] text-slate-300 space-y-1 pl-6">
+            <p>
+              Tên: <strong className="text-white">{duplicate.tool.name}</strong> (ID #{duplicate.tool.id})
+            </p>
+            <p className="text-slate-400">
+              {duplicate.message}
+            </p>
+            {(duplicate.tool.link || duplicate.tool.website_url) && (
+              <a
+                href={duplicate.tool.link || duplicate.tool.website_url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary hover:underline text-[10px] inline-flex items-center gap-1 mt-0.5"
+              >
+                Xem link gốc đã lưu <ArrowUpRight className="w-2.5 h-2.5" />
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
       {error && (
-        <div role="alert" className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-md">
-          {error}
+        <div role="alert" className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-md flex items-center justify-between gap-2">
+          <span>{error}</span>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const link = formData.link.trim();
+              if (link) analyze(link);
+            }}
+            disabled={busy || disabled}
+            className="h-7 px-2 text-xs text-rose-300 hover:text-white hover:bg-rose-500/20 shrink-0 font-medium"
+          >
+            <RotateCcw className="w-3.5 h-3.5 mr-1" />
+            Thử lại
+          </Button>
         </div>
       )}
 

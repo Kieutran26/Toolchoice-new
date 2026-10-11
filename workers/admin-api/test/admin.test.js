@@ -6,7 +6,7 @@ import { isPrivateAddress, publicUrl, readLimited } from '../src/public-fetch.js
 import { toolPayload, allRows } from '../src/database.js';
 import { imageType, replaceImage, imageInventory } from '../src/images.js';
 import { normalizeDraft, pageContent, readPage } from '../src/research.js';
-import { parseReferral } from '../../../src/lib/tool-intake.js';
+import { parseReferral, findDuplicateTool } from '../../../src/lib/tool-intake.js';
 
 test('JavaScript websites use browser rendering with same-origin requests only', async () => {
   const original = globalThis.fetch;
@@ -71,6 +71,31 @@ test('AI draft cannot create a guessed coupon, and uses Unknown for unverified p
   const freemiumDraft = normalizeDraft({ name: 'Jitter', tagline: 'Tagline', description: 'Desc', pros: 'Feature', categories: ['Thiết kế'], pricing_type: 'Free Trial' }, 'https://jitter.video');
   assert.equal(freemiumDraft.pricing_type, 'Freemium');
   assert.throws(() => normalizeDraft({}, 'https://tool.com/'));
+});
+
+test('findDuplicateTool detects existing tools by domain, normalized name, and shared platform paths', () => {
+  const existing = [
+    { id: 101, name: 'Thinking Orbs', link: 'https://thinkingorbs.com/' },
+    { id: 102, name: 'React Query', link: 'https://github.com/tanstack/query' },
+  ];
+
+  // 1. Same host regardless of www or params
+  const dupUrl = findDuplicateTool(existing, { link: 'https://www.thinkingorbs.com/docs?ref=test' });
+  assert.equal(dupUrl?.tool.id, 101);
+  assert.equal(dupUrl?.reason, 'link');
+
+  // 2. Same name case-insensitively and stripped of spaces/punctuation
+  const dupName = findDuplicateTool(existing, { name: 'thinking-orbs' });
+  assert.equal(dupName?.tool.id, 101);
+  assert.equal(dupName?.reason, 'name');
+
+  // 3. Shared hosts only match if path matches
+  assert.equal(findDuplicateTool(existing, { link: 'https://github.com/facebook/react' }), null);
+  const dupGithub = findDuplicateTool(existing, { link: 'https://github.com/tanstack/query/' });
+  assert.equal(dupGithub?.tool.id, 102);
+
+  // 4. Exclude current tool in edit mode
+  assert.equal(findDuplicateTool(existing, { name: 'Thinking Orbs', link: 'https://thinkingorbs.com' }, 101), null);
 });
 
 test('research strips executable content and follows only relevant official links', () => {

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   Plus, Edit2, Trash2, Search, RefreshCw, LogOut, Check, X,
-  Image, AlertCircle, LayoutGrid,
+  Image, AlertCircle, LayoutGrid, AlertTriangle,
   Sparkles, CheckCircle, ArrowLeft, ArrowUpRight, Loader2, Shield
 } from 'lucide-react';
 
@@ -32,8 +32,9 @@ import { loginAdmin, logoutAdmin } from '@/api/adminClient';
 import useAdminSession from '@/components/admin/use-admin-session';
 import QuickToolIntake from '@/components/admin/QuickToolIntake';
 import ImageHealthPanel from '@/components/admin/ImageHealthPanel';
+import DuplicateToolsPanel from '@/components/admin/DuplicateToolsPanel';
 import ReferralFields from '@/components/admin/ReferralFields';
-import { parseReferral } from '@/lib/tool-intake';
+import { parseReferral, findDuplicateTool, auditDuplicateTools } from '@/lib/tool-intake';
 import { pasteImage } from '@/lib/clipboard-image';
 import ImagePasteTarget from '@/components/admin/ImagePasteTarget';
 
@@ -273,6 +274,28 @@ export default function Admin() {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [duplicatePrompt, setDuplicatePrompt] = useState(null);
+  const [onlyDuplicatesFilter, setOnlyDuplicatesFilter] = useState(false);
+
+  const duplicateClusters = useMemo(() => {
+    return auditDuplicateTools(tools);
+  }, [tools]);
+
+  const duplicateToolIds = useMemo(() => {
+    const ids = new Set();
+    duplicateClusters.forEach(cluster => {
+      cluster.tools.forEach(t => ids.add(t.id));
+    });
+    return ids;
+  }, [duplicateClusters]);
+
+  const formDuplicate = useMemo(() => {
+    return findDuplicateTool(
+      tools,
+      { name: formData.name, link: formData.link },
+      selectedToolForEdit?.id
+    );
+  }, [tools, formData.name, formData.link, selectedToolForEdit?.id]);
 
   // Authentication handlers
   const handleAdminLogin = async (e) => {
@@ -313,6 +336,8 @@ export default function Admin() {
   // Filtered tools for display in table
   const filteredTools = useMemo(() => {
     return tools.filter(t => {
+      if (onlyDuplicatesFilter && !duplicateToolIds.has(t.id)) return false;
+
       const matchSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           t.short_description?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchCategory = categoryFilter === 'all' || t.categories?.includes(categoryFilter);
@@ -323,7 +348,7 @@ export default function Admin() {
       }
       return matchSearch && matchCategory && matchPricing;
     });
-  }, [tools, searchQuery, categoryFilter, pricingFilter]);
+  }, [tools, searchQuery, categoryFilter, pricingFilter, onlyDuplicatesFilter, duplicateToolIds]);
 
   // Handle open form in ADD mode
   const handleOpenAdd = () => {
@@ -402,9 +427,14 @@ export default function Admin() {
   };
 
   // Save tool (insert or update)
-  const handleSaveTool = async (e) => {
-    e.preventDefault();
+  const handleSaveTool = async (e, forceSave = false) => {
+    if (e) e.preventDefault();
     if (intakeBusy || !validateForm()) return;
+
+    if (!selectedToolForEdit && formDuplicate && !forceSave) {
+      setDuplicatePrompt(formDuplicate);
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -614,8 +644,17 @@ export default function Admin() {
         
         <ImageHealthPanel onRepaired={refreshTools} onEditTool={id => { const tool = tools.find(item => item.id === id); if (tool) handleOpenEdit(tool); }} />
 
+        {/* Duplicate Tools Audit & Notification Panel */}
+        <DuplicateToolsPanel
+          duplicateClusters={duplicateClusters}
+          onEditTool={handleOpenEdit}
+          onDeleteTool={handleOpenDelete}
+          onFilterDuplicates={() => setOnlyDuplicatesFilter(prev => !prev)}
+          isFilteringDuplicates={onlyDuplicatesFilter}
+        />
+
         {/* Statistics Cards */}
-        <section className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="bg-slate-900/40 border border-slate-800/80 rounded-xl p-4 flex flex-col justify-between hover:border-slate-700/60 transition-all duration-200">
             <span className="text-[10px] font-mono text-slate-400 tracking-wider">TOTAL DATABASE</span>
             <div className="flex items-baseline gap-2 mt-2">
@@ -649,6 +688,29 @@ export default function Admin() {
             <div className="flex items-baseline gap-2 mt-2">
               <span className="text-2xl font-bold font-mono text-rose-400">{stats.paid}</span>
               <span className="text-xs text-slate-500">paid</span>
+            </div>
+          </div>
+          <div 
+            onClick={() => setOnlyDuplicatesFilter(prev => !prev)}
+            className={`border rounded-xl p-4 flex flex-col justify-between transition-all duration-200 cursor-pointer ${
+              duplicateClusters.length > 0
+                ? (onlyDuplicatesFilter 
+                    ? 'border-amber-400 bg-amber-500/20 shadow-lg shadow-amber-500/10' 
+                    : 'border-amber-500/40 bg-amber-500/5 hover:border-amber-500/80')
+                : 'bg-slate-900/40 border-slate-800/80 hover:border-slate-700/60'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono text-slate-400 tracking-wider">TRÙNG LẶP</span>
+              {duplicateClusters.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              )}
+            </div>
+            <div className="flex items-baseline gap-2 mt-2">
+              <span className={`text-2xl font-bold font-mono ${duplicateClusters.length > 0 ? 'text-amber-400' : 'text-slate-400'}`}>
+                {duplicateClusters.length}
+              </span>
+              <span className="text-xs text-slate-500">nhóm ({duplicateToolIds.size} tool)</span>
             </div>
           </div>
         </section>
@@ -693,6 +755,23 @@ export default function Admin() {
                   <option value="freemium">Có Free Trial</option>
                   <option value="paid">Trả phí</option>
                 </select>
+
+                {/* Duplicates Quick Filter Button */}
+                {duplicateClusters.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setOnlyDuplicatesFilter(prev => !prev)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-mono border transition-all ${
+                      onlyDuplicatesFilter
+                        ? 'bg-amber-500 text-slate-950 border-amber-400 font-bold shadow-lg shadow-amber-500/20'
+                        : 'border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20'
+                    }`}
+                    title={onlyDuplicatesFilter ? 'Nhấn để xem lại tất cả công cụ' : 'Chỉ xem các công cụ bị trùng lặp'}
+                  >
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span>{onlyDuplicatesFilter ? 'Đang lọc trùng' : `Tool trùng (${duplicateToolIds.size})`}</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -920,7 +999,17 @@ export default function Admin() {
             {/* Form Fields - Scrollable */}
             <form onSubmit={handleSaveTool} className="flex-1 overflow-y-auto p-6 space-y-6">
               
-              <QuickToolIntake disabled={isSaving || Object.values(mediaBusy).some(Boolean)} formData={formData} editing={Boolean(selectedToolForEdit)} onChange={handleInputChange} onBusyChange={setIntakeBusy} onDraft={draft => setFormData(prev => ({ ...prev, ...draft, pricing_type: draft.pricing_type === 'Free Trial' ? 'Freemium' : draft.pricing_type }))} />
+              <QuickToolIntake
+                disabled={isSaving || Object.values(mediaBusy).some(Boolean)}
+                formData={formData}
+                editing={Boolean(selectedToolForEdit)}
+                existingTools={tools}
+                currentToolId={selectedToolForEdit?.id}
+                onSwitchToEdit={handleOpenEdit}
+                onChange={handleInputChange}
+                onBusyChange={setIntakeBusy}
+                onDraft={draft => setFormData(prev => ({ ...prev, ...draft, pricing_type: draft.pricing_type === 'Free Trial' ? 'Freemium' : draft.pricing_type }))}
+              />
 
               {/* Tool Identity Section */}
               <div className="space-y-4">
@@ -957,6 +1046,43 @@ export default function Admin() {
                     {formErrors.link && <p className="text-[10px] text-rose-500 font-mono mt-1">{formErrors.link}</p>}
                   </div>
                 </div>
+
+                {formDuplicate && (
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start justify-between gap-3 animate-in fade-in duration-200">
+                    <div className="flex items-start gap-2 min-w-0">
+                      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                      <div className="space-y-0.5 min-w-0">
+                        <p className="font-semibold text-amber-200">
+                          {formDuplicate.reason === 'link' ? 'Website này có thể đã được đăng ký' : 'Tên công cụ này có thể đã tồn tại'}
+                        </p>
+                        <p className="text-[11px] text-slate-300 break-words">
+                          {formDuplicate.message}.
+                        </p>
+                        {(formDuplicate.tool.link || formDuplicate.tool.website_url) && (
+                          <a
+                            href={formDuplicate.tool.link || formDuplicate.tool.website_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-primary hover:underline text-[10px] inline-flex items-center gap-1 font-mono pt-0.5"
+                          >
+                            Xem link tool gốc <ArrowUpRight className="w-2.5 h-2.5" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                    {!selectedToolForEdit && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleOpenEdit(formDuplicate.tool)}
+                        className="h-7 text-xs border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 hover:text-white shrink-0 font-medium"
+                      >
+                        Sửa tool cũ
+                      </Button>
+                    )}
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <label htmlFor="tagline" className="text-xs font-semibold text-slate-300">Tagline (Mô tả ngắn gọn) <span className="text-rose-500">*</span></label>
@@ -1217,7 +1343,7 @@ export default function Admin() {
                 HUỶ BỎ
               </Button>
               <Button 
-                variant="destructive"
+                variant="destructive" 
                 onClick={handleDeleteTool}
                 disabled={isDeleting}
                 className="text-xs font-mono font-semibold"
@@ -1233,6 +1359,69 @@ export default function Admin() {
                     DELETE_RECORD
                   </>
                 )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Duplicate Confirmation Prompt */}
+      {duplicatePrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-amber-500/40 rounded-xl max-w-md w-full p-6 shadow-2xl relative space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold font-mono text-amber-300 uppercase tracking-tight">
+                  Phát hiện công cụ có thể bị trùng!
+                </h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Hệ thống nhận thấy công cụ này <span className="font-semibold text-amber-200">{duplicatePrompt.message}</span>.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-800 rounded-lg p-3 text-xs space-y-1.5 text-slate-300">
+              <p><span className="text-slate-500">Tool đã có:</span> <strong className="text-white">{duplicatePrompt.tool.name}</strong> (ID #{duplicatePrompt.tool.id})</p>
+              <p><span className="text-slate-500">Tagline:</span> <span className="italic text-slate-400">"{duplicatePrompt.tool.short_description || duplicatePrompt.tool.raw_tagline}"</span></p>
+              <p className="truncate"><span className="text-slate-500">Link:</span> <a href={duplicatePrompt.tool.link || duplicatePrompt.tool.website_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">{duplicatePrompt.tool.link || duplicatePrompt.tool.website_url}</a></p>
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setDuplicatePrompt(null)}
+                className="text-xs border-slate-800 text-slate-400 hover:text-white"
+              >
+                Đóng & Kiểm tra lại
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const target = duplicatePrompt.tool;
+                  setDuplicatePrompt(null);
+                  handleOpenEdit(target);
+                }}
+                className="text-xs border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 hover:text-white font-medium"
+              >
+                Chuyển sang sửa tool cũ
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => {
+                  setDuplicatePrompt(null);
+                  handleSaveTool(null, true);
+                }}
+                className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300"
+              >
+                Vẫn lưu mới
               </Button>
             </div>
           </div>
