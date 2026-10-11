@@ -74,12 +74,22 @@ export function pageContent(html, url) {
     } catch { /* Invalid external links are not research sources. */ }
   }
 
+  const structuredBlocks = [
+    title ? `Tiêu đề trang: ${title}` : '',
+    description ? `Mô tả: ${description}` : '',
+    headings.length ? `Các mục chính: ${headings.join(' | ')}` : '',
+    features.length ? `Tính năng: ${features.join(' | ')}` : '',
+    cleanHtml ? `Nội dung: ${cleanHtml}` : '',
+  ].filter(Boolean);
+
+  const finalText = (cleanHtml.length >= 200 ? cleanHtml : structuredBlocks.join('\n\n')).trim();
+
   return {
     title,
     description,
     headings: headings.slice(0, 12),
     features: features.slice(0, 10),
-    text: cleanHtml.slice(0, MAXIMUM_PAGE_TEXT_LENGTH),
+    text: finalText.slice(0, MAXIMUM_PAGE_TEXT_LENGTH),
     links: links.slice(0, MAXIMUM_RESEARCH_PAGES),
   };
 }
@@ -100,24 +110,37 @@ export async function readPage(url, env = {}) {
   const html = new TextDecoder().decode(await readLimited(result.response, 1000000));
   let content = pageContent(html, result.url);
   if (content.text.length < MINIMUM_PAGE_TEXT_LENGTH && env.BROWSER) {
-    const origin = new URL(result.url).origin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const rendered = await env.BROWSER.quickAction('content', {
-      url: result.url,
-      gotoOptions: { waitUntil: 'networkidle2', timeout: 20000 },
-      allowRequestPattern: [`^${origin}(?:/|$)`],
-      rejectResourceTypes: ['image', 'media', 'font'],
-    });
-    if (!rendered.ok) throw Object.assign(new Error('Không thể đọc website chạy JavaScript. Hãy thử lại hoặc nhập thủ công.'), { status: 422 });
-    const bytes = await readLimited(rendered, 2000000);
-    const text = new TextDecoder().decode(bytes);
-    let renderedHtml = text;
-    if (/application\/json/i.test(rendered.headers.get('content-type') || '')) {
-      const data = JSON.parse(text);
-      renderedHtml = typeof data.result === 'string' ? data.result : '';
+    try {
+      const origin = new URL(result.url).origin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const rendered = await env.BROWSER.quickAction('content', {
+        url: result.url,
+        gotoOptions: { waitUntil: 'networkidle2', timeout: 20000 },
+        allowRequestPattern: [`^${origin}(?:/|$)`],
+        rejectResourceTypes: ['image', 'media', 'font'],
+      });
+      if (rendered?.ok) {
+        const bytes = await readLimited(rendered, 2000000);
+        const text = new TextDecoder().decode(bytes);
+        let renderedHtml = text;
+        if (/application\/json/i.test(rendered.headers.get('content-type') || '')) {
+          const data = JSON.parse(text);
+          renderedHtml = typeof data.result === 'string' ? data.result : '';
+        }
+        if (renderedHtml) {
+          content = pageContent(renderedHtml, result.url);
+        }
+      } else if (!content.description && content.text.length < 30) {
+        throw Object.assign(new Error('Không thể đọc website chạy JavaScript. Hãy thử lại hoặc nhập thủ công.'), { status: 422 });
+      }
+    } catch (browserError) {
+      if (!content.description && content.text.length < 30) {
+        throw browserError;
+      }
     }
-    content = pageContent(renderedHtml, result.url);
   }
-  if (content.text.length < MINIMUM_PAGE_TEXT_LENGTH) {
+
+  const hasSignal = content.text.length >= 30 || content.description.length >= 15 || (content.title.length >= 3 && content.headings.length > 0);
+  if (!hasSignal) {
     throw Object.assign(new Error('Website không cung cấp đủ nội dung để AI phân tích. Bạn có thể nhập thủ công.'), { status: 422 });
   }
   return { url: result.url, ...content };

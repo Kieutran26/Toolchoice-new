@@ -57,7 +57,7 @@ export default function QuickToolIntake({ formData, onChange, onDraft, onBusyCha
       }
     } catch (err) {
       if (err.name !== 'AbortError') {
-        attempted.current = '';
+        attempted.current = link;
         setError(err.message || 'Không thể phân tích website.');
         toast({
           title: 'Lỗi phân tích',
