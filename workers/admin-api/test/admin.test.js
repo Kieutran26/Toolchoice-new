@@ -60,11 +60,16 @@ test('stream size limits also apply when Content-Length is absent', async () => 
 });
 
 test('AI draft cannot create a guessed coupon, and uses Unknown for unverified pricing', () => {
-  const draft = normalizeDraft({ name: 'Tool', tagline: 'Mô tả', description: 'Chi tiết', pros: ['Feature'], categories: ['AI', 'Bogus'], promotion_code: 'INVENTED', pricing_type: 'maybe-free' }, 'https://tool.com/?via=alice');
+  const draft = normalizeDraft({ name: 'Tool - Slogan.io', tagline: 'Mô tả', description: 'Chi tiết', pros: ['- Feature 1', '• Feature 2'], categories: ['AI', 'Bogus'], promotion_code: 'INVENTED', pricing_type: 'maybe-free' }, 'https://tool.com/?via=alice');
+  assert.equal(draft.name, 'Tool');
+  assert.equal(draft.pros, 'Feature 1\nFeature 2');
   assert.equal(draft.referral_code, 'alice');
   assert.equal(draft.promotion_code, '');
   assert.equal(draft.pricing_type, 'Unknown');
   assert.deepEqual(draft.categories, ['AI']);
+
+  const freemiumDraft = normalizeDraft({ name: 'Jitter', tagline: 'Tagline', description: 'Desc', pros: 'Feature', categories: ['Thiết kế'], pricing_type: 'Free Trial' }, 'https://jitter.video');
+  assert.equal(freemiumDraft.pricing_type, 'Freemium');
   assert.throws(() => normalizeDraft({}, 'https://tool.com/'));
 });
 

@@ -35,7 +35,8 @@ export default {
       }
       if (path === '/analyze' && request.method === 'POST') {
         if (!env.AI_LIMITER || !(await env.AI_LIMITER.limit({ key: session.email })).success) return reply({ error: 'AI đang nhận quá nhiều yêu cầu. Thử lại sau một phút.' }, 429);
-        return reply(await analyzeWebsite((await jsonBody(request)).link, env));
+        const payload = await jsonBody(request);
+        return reply(await analyzeWebsite(payload.link, env, payload.notes));
       }
       if (path === '/upload' && request.method === 'POST') return reply(await upload(request, env));
       if (path === '/images' && request.method === 'GET') return reply(await imageInventory(env));
