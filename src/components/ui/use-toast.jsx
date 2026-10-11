@@ -1,8 +1,8 @@
 // Inspired by react-hot-toast library
 import { useState, useEffect } from "react";
 
-const TOAST_LIMIT = 20;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_LIMIT = 5;
+const TOAST_REMOVE_DELAY = 400;
 
 const actionTypes = {
   ADD_TOAST: "ADD_TOAST",
@@ -19,6 +19,14 @@ function genId() {
 }
 
 const toastTimeouts = new Map();
+const toastDismissTimers = new Map();
+
+const clearDismissTimer = (toastId) => {
+  if (toastDismissTimers.has(toastId)) {
+    clearTimeout(toastDismissTimers.get(toastId));
+    toastDismissTimers.delete(toastId);
+  }
+};
 
 const addToRemoveQueue = (toastId) => {
   if (toastTimeouts.has(toastId)) {
@@ -63,12 +71,12 @@ export const reducer = (state, action) => {
     case actionTypes.DISMISS_TOAST: {
       const { toastId } = action;
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
+        clearDismissTimer(toastId);
         addToRemoveQueue(toastId);
       } else {
         state.toasts.forEach((toast) => {
+          clearDismissTimer(toast.id);
           addToRemoveQueue(toast.id);
         });
       }
@@ -110,7 +118,7 @@ function dispatch(action) {
   });
 }
 
-function toast({ ...props }) {
+function toast({ duration, ...props }) {
   const id = genId();
 
   const update = (props) =>
@@ -119,8 +127,10 @@ function toast({ ...props }) {
       toast: { ...props, id },
     });
 
-  const dismiss = () =>
+  const dismiss = () => {
+    clearDismissTimer(id);
     dispatch({ type: actionTypes.DISMISS_TOAST, toastId: id });
+  };
 
   dispatch({
     type: actionTypes.ADD_TOAST,
@@ -133,6 +143,20 @@ function toast({ ...props }) {
       },
     },
   });
+
+  const autoDismissDelay =
+    duration !== undefined
+      ? duration
+      : props.variant === "destructive"
+      ? 5000
+      : 3500;
+
+  if (autoDismissDelay > 0 && autoDismissDelay !== Infinity) {
+    const timer = setTimeout(() => {
+      dismiss();
+    }, autoDismissDelay);
+    toastDismissTimers.set(id, timer);
+  }
 
   return {
     id,
