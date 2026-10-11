@@ -265,11 +265,17 @@ Trả về DUY NHẤT một JSON object hợp lệ theo schema trên.`;
     })),
   };
 
-  const primaryModel = env.AI_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
-  const fallbackModel = '@cf/meta/llama-3.1-8b-instruct';
-  let result;
-  try {
-    result = await env.AI.run(primaryModel, {
+  const primaryModel = env.AI_MODEL || '@cf/meta/llama-3.1-8b-instruct';
+  const fallbackModel = primaryModel === '@cf/meta/llama-3.1-8b-instruct'
+    ? '@cf/meta/llama-3.3-70b-instruct-fp8-fast'
+    : '@cf/meta/llama-3.1-8b-instruct';
+
+  const callAi = async (model, timeoutMs = 18000) => {
+    let timer;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`Model ${model} phản hồi quá lâu (${timeoutMs / 1000}s).`)), timeoutMs);
+    });
+    const run = env.AI.run(model, {
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: JSON.stringify(websiteInput) },
@@ -278,22 +284,20 @@ Trả về DUY NHẤT một JSON object hợp lệ theo schema trên.`;
       max_tokens: 2200,
       temperature: 0.2,
     });
+    try {
+      return await Promise.race([run, timeout]);
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  let result;
+  try {
+    result = await callAi(primaryModel, 18000);
   } catch (primaryError) {
-    if (primaryModel !== fallbackModel) {
-      try {
-        result = await env.AI.run(fallbackModel, {
-          messages: [
-            { role: 'system', content: system },
-            { role: 'user', content: JSON.stringify(websiteInput) },
-          ],
-          response_format: { type: 'json_object' },
-          max_tokens: 2200,
-          temperature: 0.2,
-        });
-      } catch {
-        throw primaryError;
-      }
-    } else {
+    try {
+      result = await callAi(fallbackModel, 25000);
+    } catch {
       throw primaryError;
     }
   }
