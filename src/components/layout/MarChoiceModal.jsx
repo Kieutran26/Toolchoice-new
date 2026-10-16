@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { ArrowUpRight, BrainCircuit, Sparkles, X } from 'lucide-react';
+import { ArrowUpRight, Sparkles, X } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 
 const DISMISS_KEY = 'marchoice_popup_dismissed_until';
@@ -64,7 +64,7 @@ export default function MarChoiceModal() {
           <div className="flex items-center justify-between gap-3 border-b border-border px-6 py-3">
             <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-primary">
               <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0" />
-              HỆ SINH THÁI NEXTHOICE
+              Hệ sinh thái NextChoice
             </span>
             <Dialog.Close aria-label="Đóng giới thiệu Marchoice" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <X aria-hidden="true" className="h-5 w-5" />
@@ -73,9 +73,13 @@ export default function MarChoiceModal() {
 
           <div className="space-y-6 px-6 py-7 sm:px-8 sm:py-8">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                <BrainCircuit aria-hidden="true" className="h-7 w-7" />
-              </div>
+              <img
+                src="/marchoice-logo.png"
+                alt="Logo Marchoice"
+                width={64}
+                height={64}
+                className="h-16 w-16 shrink-0 rounded-xl bg-white object-contain"
+              />
               <div>
                 <Dialog.Title className="text-2xl font-bold tracking-tight">Marchoice</Dialog.Title>
                 <p className="mt-0.5 text-sm text-muted-foreground">marchoice.site</p>
@@ -87,7 +91,7 @@ export default function MarChoiceModal() {
                 Học và làm cùng AI dành riêng cho dân Marketer
               </p>
               <Dialog.Description className="text-sm leading-relaxed text-muted-foreground">
-                Khám phá Marchoice — website dành cho Marketer trong hệ sinh thái Nexthoice.
+                Khám phá Marchoice — website dành cho Marketer trong hệ sinh thái NextChoice.
                 Cùng đưa AI vào việc học và công việc Marketing mỗi ngày.
               </Dialog.Description>
             </div>
