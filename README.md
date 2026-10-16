@@ -39,3 +39,7 @@ Toolchoice admin: [Hướng dẫn quản trị và cấu hình AI](docs/admin-gu
 Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
 
 Support: [https://app.base44.com/support](https://app.base44.com/support)
+
+### Marchoice introduction
+
+Public browsing pages show the Marchoice introduction after 1.2 seconds. The popup links to https://marchoice.site in a new tab and can be reopened from the ecosystem section in the sidebar. Closing it pauses reminders for 4 hours; selecting the 24-hour option or visiting Marchoice pauses reminders for 24 hours. Preferences are saved in browser storage when available. Authentication and admin pages do not show the popup.

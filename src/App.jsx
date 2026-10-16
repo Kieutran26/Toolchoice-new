@@ -17,6 +17,7 @@ import Admin from '@/pages/Admin';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { AuthProvider } from '@/lib/AuthContext';
+import MarChoiceModal from '@/components/layout/MarChoiceModal';
 
 const PublicApp = () => {
   return (
@@ -48,6 +49,7 @@ function App() {
           <Router>
             <ScrollToTop />
             <PublicApp />
+            <MarChoiceModal />
           </Router>
           <Toaster />
           <Analytics />
