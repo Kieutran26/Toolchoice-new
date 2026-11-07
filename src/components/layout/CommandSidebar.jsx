@@ -7,7 +7,6 @@ import { buildCategoryOptions } from "@/lib/tool-categories";
 import { useQuery } from '@tanstack/react-query';
 import { listTools } from '@/api/toolsClient';
 import NewsletterSubscription from '@/components/newsletter/NewsletterSubscription';
-import { openMarChoiceModal } from '@/components/layout/MarChoiceModal';
 
 export default function CommandSidebar({ activeCategory, onCategoryChange, searchQuery, onSearchChange, categoryCounts, isMobileOpen, onMobileClose, onSelectTool }) {
   const categories = buildCategoryOptions(categoryCounts);
@@ -151,17 +150,16 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
           </Link>
 
           {/* Newsletter Subscription */}
-          <button
-            type="button"
-            onClick={() => {
-              onMobileClose?.();
-              openMarChoiceModal();
-            }}
+          <a
+            href="https://marchoice.site"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => onMobileClose?.()}
             className="mt-3 flex min-h-11 w-full items-center gap-2.5 rounded-lg border border-primary/20 bg-primary/5 px-3 py-3 text-left text-sm transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0 text-primary" />
             <span><span className="block font-semibold">Marchoice</span><span className="block text-xs text-muted-foreground">Hệ sinh thái NextChoice</span></span>
-          </button>
+          </a>
           <div className="mt-2">
             <NewsletterSubscription variant="sidebar" source="sidebar" />
           </div>
