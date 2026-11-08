@@ -214,7 +214,7 @@ function generateNewsletterHtml(tools) {
                 Bạn nhận được email này vì đã đăng ký nhận tin tại <a href="https://toolchoice.site" style="color: #306D29; text-decoration: none; font-weight: 600;">Toolchoice.site</a>
               </p>
               <p style="font-size: 11px; color: #a1a1aa; margin: 0; line-height: 1.5;">
-                Nếu không muốn tiếp tục nhận email này, bạn có thể <a href="https://toolchoice.site?action=unsubscribe" style="color: #71717a; text-decoration: underline;">hủy đăng ký tại đây</a> bất kỳ lúc nào.
+                Nếu không muốn tiếp tục nhận email này, bạn có thể <a href="mailto:support@toolchoice.site?subject=Ngung%20nhan%20ban%20tin%20Toolchoice" style="color: #71717a; text-decoration: underline;">gửi yêu cầu ngừng nhận tin</a> bất kỳ lúc nào.
               </p>
             </td>
           </tr>

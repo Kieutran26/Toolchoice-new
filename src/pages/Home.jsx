@@ -100,9 +100,9 @@ export default function Home() {
                 <Menu className="w-4 h-4" />
               </button>
               <div>
-                <h2 className="text-sm font-semibold text-foreground">
+                <h1 className="text-sm font-semibold text-foreground">
                   Tất cả công cụ
-                </h2>
+                </h1>
                 <p className="text-[10px] font-mono text-muted-foreground/60 tracking-wider">
                   {filteredTools.length} RESULTS FOUND
                 </p>
@@ -115,6 +115,11 @@ export default function Home() {
           </div>
         </div>
 
+        <section aria-label="Khám phá Toolchoice" className="px-4 lg:px-5 pt-5 text-sm text-muted-foreground">
+          <h2 className="text-lg font-semibold text-foreground">Khám phá công cụ cho công việc của bạn</h2>
+          <p className="mt-1">Tìm theo danh mục, đọc tổng quan và tính năng, rồi kiểm tra giá mới nhất tại nhà cung cấp.</p>
+          <a href="/choosing-tools.html" className="mt-2 inline-block underline">Cách so sánh và thử công cụ trước khi đăng ký</a>
+        </section>
         {/* Grid */}
         <div className="flex-1 p-4 lg:p-5">
           {error ? (

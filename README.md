@@ -43,3 +43,11 @@ Support: [https://app.base44.com/support](https://app.base44.com/support)
 ### Marchoice introduction
 
 Public browsing pages show the Marchoice introduction after 1.2 seconds. The popup links to https://marchoice.site in a new tab and can be reopened from the ecosystem section in the sidebar. Closing it pauses reminders for 4 hours; selecting the 24-hour option or visiting Marchoice pauses reminders for 24 hours. Preferences are saved in browser storage when available. Authentication and admin pages do not show the popup.
+
+### Publisher information and AdSense
+
+Public information pages live in `public/about.html`, `public/contact.html`, `public/privacy.html`, and `public/choosing-tools.html`; their shared styles are in `public/publisher-pages.css`. Navigation is provided by `PublisherLinks`, with privacy information next to newsletter forms. Update the privacy disclosure whenever data processing changes. The confirmed public contact is `support@toolchoice.site`.
+
+`public/sitemap.xml` lists the public entry points referenced by `public/robots.txt`. `public/ads.txt` and the AdSense account meta tag must use the same publisher account. Site approval remains Google's decision; publishing these pages does not guarantee approval.
+
+Production `www.toolchoice.site` is served by the existing Vercel project `toolchoice-new` in team `nguyenngockieutran-3710s-projects`. CLI deployments use `npx vercel deploy --prod --yes --scope nguyenngockieutran-3710s-projects` after linking that project. `.vercelignore` excludes local environment files and private workspace metadata. Never commit or upload environment secrets. Verify public pages and `ads.txt` after deployment; use the Vercel deployment history to restore the previous production deployment if needed.

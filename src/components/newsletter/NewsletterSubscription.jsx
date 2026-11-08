@@ -67,7 +67,7 @@ export default function NewsletterSubscription({
         ) : (
           <form onSubmit={handleSubmit} className="relative flex items-center">
             <input
-              type="email"
+              type="email" aria-label="Email nhận bản tin Toolchoice"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Nhập email của bạn..."
@@ -89,6 +89,7 @@ export default function NewsletterSubscription({
             </button>
           </form>
         )}
+        <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">Email được dùng để gửi bản tin. <a className="underline" href="/privacy.html">Quyền riêng tư &amp; ngừng nhận tin</a>.</p>
       </div>
     );
   }
@@ -125,7 +126,7 @@ export default function NewsletterSubscription({
             <div className="relative flex-1">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
-                type="email"
+                type="email" aria-label="Email nhận bản tin Toolchoice"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Nhập email của bạn..."
@@ -154,6 +155,7 @@ export default function NewsletterSubscription({
           </form>
         )}
       </div>
+      <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">Email được dùng để gửi bản tin. <a className="underline" href="/privacy.html">Quyền riêng tư &amp; ngừng nhận tin</a>.</p>
     </div>
   );
 }

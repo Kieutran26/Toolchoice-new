@@ -1,0 +1,12 @@
+.env
+.env.*
+.claude
+.git
+node_modules
+dist
+.wrangler
+.vercel
+logs
+*.log
+mapping-urls.json
+update-db-urls.sql
