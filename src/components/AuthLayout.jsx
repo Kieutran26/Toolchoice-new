@@ -1,8 +1,14 @@
 import React from "react";
+import SEOHead from "@/components/SEOHead";
 
 export default function AuthLayout({ icon: Icon, title, subtitle, footer, children }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <SEOHead
+        title={`${title} | Toolchoice`}
+        description="Trang xác thực tài khoản quản trị trên Toolchoice."
+        robots="noindex, nofollow"
+      />
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary mb-4">

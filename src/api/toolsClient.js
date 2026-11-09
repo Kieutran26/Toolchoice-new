@@ -1,6 +1,7 @@
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://rwphopolciuwrmmzztpm.supabase.co';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3cGhvcG9sY2l1d3JtbXp6dHBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwODYxNDcsImV4cCI6MjA3ODY2MjE0N30._O7Q0NsrEXNDcUbc_xBJwpt_FDBIkiiwErxXFWyJCro';
 import { adminJson, adminRequest, uploadAdminImage } from './adminClient';
+import toolsSnapshot from '@/data/tools-snapshot.json';
 
 const TOOL_COLUMNS = [
   'id',
@@ -110,29 +111,43 @@ export function normalizeTool(tool) {
   };
 }
 
+const INITIAL_NORMALIZED_TOOLS = Array.isArray(toolsSnapshot)
+  ? toolsSnapshot.map(normalizeTool).filter((t) => t.id !== 168)
+  : [];
+
+export function getInitialTools() {
+  return INITIAL_NORMALIZED_TOOLS;
+}
+
 export async function listTools(limit = 200) {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Missing Supabase environment variables.');
+    return INITIAL_NORMALIZED_TOOLS;
   }
 
-  const url = new URL('/rest/v1/tools', SUPABASE_URL);
-  url.searchParams.set('select', TOOL_COLUMNS);
-  url.searchParams.set('order', 'created_at.desc');
-  url.searchParams.set('limit', String(limit));
+  try {
+    const url = new URL('/rest/v1/tools', SUPABASE_URL);
+    url.searchParams.set('select', TOOL_COLUMNS);
+    url.searchParams.set('order', 'created_at.desc');
+    url.searchParams.set('limit', String(limit));
 
-  const response = await fetch(url, {
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-    },
-  });
+    const response = await fetch(url, {
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error(`Unable to load tools from Supabase: ${response.status}`);
+    if (!response.ok) {
+      if (INITIAL_NORMALIZED_TOOLS.length > 0) return INITIAL_NORMALIZED_TOOLS;
+      throw new Error(`Unable to load tools from Supabase: ${response.status}`);
+    }
+
+    const tools = await response.json();
+    return tools.map(normalizeTool).filter(t => t.id !== 168);
+  } catch (err) {
+    if (INITIAL_NORMALIZED_TOOLS.length > 0) return INITIAL_NORMALIZED_TOOLS;
+    throw err;
   }
-
-  const tools = await response.json();
-  return tools.map(normalizeTool).filter(t => t.id !== 168);
 }
 
 export async function listAdminTools() {

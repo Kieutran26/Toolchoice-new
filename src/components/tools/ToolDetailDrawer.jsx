@@ -1,11 +1,11 @@
 import React from 'react';
-import { X, ExternalLink, Globe, Cpu, Check, Layers, Gift } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { X, ExternalLink, Globe, Cpu, Check, Layers, Gift, AlertTriangle, BookOpen } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from 'framer-motion';
-import { cn } from "@/lib/utils";
 import { getCategoryLabel } from "@/lib/tool-categories";
+import { getToolSlug, buildToolEditorialReview } from "@/lib/tool-content";
 
 export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
   const [imgError, setImgError] = React.useState(false);
@@ -15,6 +15,9 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
   }, [tool?.id]);
 
   if (!tool) return null;
+
+  const toolSlug = getToolSlug(tool);
+  const review = buildToolEditorialReview(tool, []);
 
   return (
     <AnimatePresence>
@@ -36,7 +39,7 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
-            className="fixed top-0 right-0 h-full w-full sm:w-[520px] lg:w-[600px] bg-card border-l border-border z-50 flex flex-col overflow-hidden"
+            className="fixed top-0 right-0 h-full w-full sm:w-[540px] lg:w-[620px] bg-card border-l border-border z-50 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-secondary/30">
@@ -75,7 +78,7 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
 
               <div className="px-5 py-5 space-y-5 -mt-10 relative">
                 {/* Title Block */}
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <ToolLogoLarge tool={tool} />
                     <div className="min-w-0">
@@ -83,15 +86,23 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
                       <p className="text-xs text-muted-foreground leading-relaxed mt-0.5 line-clamp-2">{tool.short_description}</p>
                     </div>
                   </div>
-                  {tool.website_url && (
-                    <a href={tool.website_url} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
-                      <Button className="custom-primary-button font-mono tracking-wider text-[10px] sm:text-xs px-3 h-9 flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5" />
-                        TRUY CẬP WEBSITE
-                        <ExternalLink className="w-3 h-3" />
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Link to={`/tool/${toolSlug}`} onClick={onClose}>
+                      <Button variant="outline" className="font-mono tracking-wider text-[10px] sm:text-xs px-3 h-9 flex items-center gap-1.5">
+                        <BookOpen className="w-3.5 h-3.5 text-primary" />
+                        BÀI ĐÁNH GIÁ &amp; SO SÁNH
                       </Button>
-                    </a>
-                  )}
+                    </Link>
+                    {tool.website_url && (
+                      <a href={tool.website_url} target="_blank" rel="noopener noreferrer">
+                        <Button className="custom-primary-button font-mono tracking-wider text-[10px] sm:text-xs px-3 h-9 flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5" />
+                          WEBSITE
+                          <ExternalLink className="w-3 h-3" />
+                        </Button>
+                      </a>
+                    )}
+                  </div>
                 </div>
 
                 {/* Referral Offer */}
@@ -124,54 +135,63 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
                   )}
                 </div>
 
-
-
-                {/* Platforms */}
-                {tool.platforms?.length > 0 && (
-                  <div>
-                    <h3 className="text-[10px] font-mono font-semibold text-muted-foreground tracking-[0.15em] mb-3">
-                      PLATFORMS
-                    </h3>
-                    <div className="flex flex-wrap gap-1.5">
-                      {tool.platforms.map((p, i) => (
-                        <span key={i} className="text-[10px] font-mono px-2 py-1 rounded bg-secondary border border-border text-foreground/80">
-                          {p}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {/* Description */}
-                {tool.full_description && (
-                  <div>
-                    <h3 className="text-[10px] font-mono font-semibold text-muted-foreground tracking-[0.15em] mb-3">
-                      OVERVIEW
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {tool.full_description}
-                    </p>
+                <div>
+                  <h3 className="text-[10px] font-mono font-semibold text-muted-foreground tracking-[0.15em] mb-2">
+                    TỔNG QUAN &amp; ĐÁNH GIÁ
+                  </h3>
+                  <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
+                    {review.overviewParagraphs.slice(0, 2).map((p, i) => (
+                      <p key={i}>{p}</p>
+                    ))}
                   </div>
-                )}
+                </div>
 
-                {/* Features */}
-                {tool.features?.length > 0 && (
+                {/* Pros */}
+                {review.prosList.length > 0 && (
                   <div>
-                    <h3 className="text-[10px] font-mono font-semibold text-muted-foreground tracking-[0.15em] mb-3">
-                      KEY FEATURES
+                    <h3 className="text-[10px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 tracking-[0.15em] mb-2.5">
+                      ƯU ĐIỂM &amp; TÍNH NĂNG NỔI BẬT
                     </h3>
                     <div className="space-y-2">
-                      {tool.features.map((f, i) => (
+                      {review.prosList.map((f, i) => (
                         <div key={i} className="flex items-start gap-2.5">
-                          <Check className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-foreground/80">{f}</span>
+                          <Check className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-foreground/85">{f}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
+                {/* Cons / Caveats */}
+                {review.consList.length > 0 && (
+                  <div>
+                    <h3 className="text-[10px] font-mono font-semibold text-amber-600 dark:text-amber-400 tracking-[0.15em] mb-2.5">
+                      LƯU Ý &amp; HẠN CHẾ KHI SỬ DỤNG
+                    </h3>
+                    <div className="space-y-2">
+                      {review.consList.map((c, i) => (
+                        <div key={i} className="flex items-start gap-2.5">
+                          <AlertTriangle className="w-3.5 h-3.5 text-amber-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{c}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
+                {/* Link to Full Review Page */}
+                <div className="pt-2">
+                  <Link
+                    to={`/tool/${toolSlug}`}
+                    onClick={onClose}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-primary/30 bg-primary/10 text-primary text-xs font-mono font-bold hover:bg-primary/15 transition-colors"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    XEM HƯỚNG DẪN TỪNG BƯỚC &amp; BẢNG SO SÁNH CHI TIẾT →
+                  </Link>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -202,7 +222,6 @@ function ToolLogoLarge({ tool }) {
     </div>
   );
 }
-
 
 function PricingBadgeLarge({ pricing }) {
   if (pricing === 'free') {

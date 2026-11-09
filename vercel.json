@@ -1,5 +1,19 @@
 {
+  "headers": [
+    {
+      "source": "/ads.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    }
+  ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/choosing-tools", "destination": "/choosing-tools.html" },
+    { "source": "/((?!ads\\.txt|robots\\.txt|sitemap\\.xml|.*\\.html$).*)", "destination": "/index.html" }
   ]
 }
