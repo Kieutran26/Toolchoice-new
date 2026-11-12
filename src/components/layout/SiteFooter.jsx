@@ -1,4 +1,5 @@
 import React from 'react';
+import PublisherLinks from './PublisherLinks';
 import { Link } from 'react-router-dom';
 import { BLOG_POSTS } from '@/data/blog-posts';
 
@@ -15,10 +16,10 @@ export default function SiteFooter() {
             <span className="text-sm font-bold font-mono tracking-wider text-foreground">TOOLCHOICE</span>
           </div>
           <p>
-            Toolchoice là nền tảng tiếng Việt chuyên tổng hợp, đánh giá ưu nhược điểm, hướng dẫn sử dụng thực tế và so sánh các công cụ AI, thiết kế, lập trình, marketing và năng suất.
+            Toolchoice là nền tảng tiếng Việt chuyên tổng hợp thông tin, tính năng và cẩm nang lựa chọn các công cụ AI, thiết kế, lập trình, marketing và năng suất.
           </p>
           <p className="text-[11px] text-muted-foreground/80">
-            Mọi thông tin đánh giá nhằm mục đích tham khảo độc lập. Người dùng vui lòng kiểm tra bảng giá và điều khoản mới nhất trên website chính thức của từng nhà cung cấp.
+            Các hồ sơ thông tin không phải báo cáo kiểm thử độc lập. Người dùng vui lòng kiểm tra bảng giá và điều khoản mới nhất trên website chính thức của từng nhà cung cấp.
           </p>
           <p className="font-mono text-[11px] text-foreground/80">
             Liên hệ hỗ trợ: <a href="mailto:support@toolchoice.site" className="underline hover:text-primary">support@toolchoice.site</a>
@@ -89,12 +90,7 @@ export default function SiteFooter() {
 
       <div className="border-t border-border px-4 lg:px-6 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-[11px] font-mono text-muted-foreground/60">
         <span>© {new Date().getFullYear()} Toolchoice (www.toolchoice.site). Bảo lưu mọi quyền.</span>
-        <div className="flex flex-wrap gap-4">
-          <a href="/about.html" className="hover:text-foreground">Giới thiệu</a>
-          <a href="/privacy.html" className="hover:text-foreground">Quyền riêng tư</a>
-          <a href="/terms.html" className="hover:text-foreground">Điều khoản</a>
-          <a href="/contact.html" className="hover:text-foreground">Liên hệ</a>
-        </div>
+        <PublisherLinks />
       </div>
     </footer>
   );

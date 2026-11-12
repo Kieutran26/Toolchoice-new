@@ -1,13 +1,11 @@
-import PublisherLinks from './PublisherLinks';
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Search, ChevronRight, Percent, Sparkles, Shuffle, BookOpen } from 'lucide-react';
+import { Search, ChevronRight, Percent, Sparkles, Shuffle } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { buildCategoryOptions, categoryToSlug, ALL_CATEGORY_ID } from "@/lib/tool-categories";
 import { useQuery } from '@tanstack/react-query';
 import { listTools, getInitialTools } from '@/api/toolsClient';
-import NewsletterSubscription from '@/components/newsletter/NewsletterSubscription';
 
 export default function CommandSidebar({ activeCategory, onCategoryChange, searchQuery, onSearchChange, categoryCounts, isMobileOpen, onMobileClose, onSelectTool }) {
   const categories = buildCategoryOptions(categoryCounts);
@@ -143,21 +141,6 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
 
           <div className="space-y-1.5">
             <Link
-              to="/blog"
-              onClick={() => onMobileClose?.()}
-              className={cn(
-                "relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-mono font-bold tracking-[0.12em] overflow-hidden transition-all duration-200 border",
-                isBlogActive
-                  ? "bg-primary/15 border-primary/50 text-primary shadow-sm"
-                  : "bg-primary/5 border-primary/20 text-foreground/85 hover:bg-primary/10 hover:border-primary/35"
-              )}
-            >
-              <BookOpen className="w-4 h-4 flex-shrink-0 text-primary" />
-              <span className="flex-1 text-left">BLOG &amp; CẨM NANG</span>
-              <ChevronRight className="w-3.5 h-3.5 flex-shrink-0 text-primary" />
-            </Link>
-
-            <Link
               to="/deals"
               onClick={() => onMobileClose?.()}
               className={cn(
@@ -173,24 +156,9 @@ export default function CommandSidebar({ activeCategory, onCategoryChange, searc
             </Link>
           </div>
 
-          {/* Ecosystem & Newsletter */}
-          <a
-            href="https://marchoice.site"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => onMobileClose?.()}
-            className="mt-3 flex min-h-11 w-full items-center gap-2.5 rounded-lg border border-primary/20 bg-primary/5 px-3 py-3 text-left text-sm transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <Sparkles aria-hidden="true" className="h-4 w-4 shrink-0 text-primary" />
-            <span><span className="block font-semibold">Marchoice</span><span className="block text-xs text-muted-foreground">Hệ sinh thái NextChoice</span></span>
-          </a>
-          <div className="mt-2">
-            <NewsletterSubscription variant="sidebar" source="sidebar" />
-          </div>
         </nav>
 
         <div className="px-3 py-2.5 border-t border-border space-y-2.5 flex flex-col">
-          <PublisherLinks />
           <button
             onClick={handleRandomSelect}
             disabled={tools.length === 0}

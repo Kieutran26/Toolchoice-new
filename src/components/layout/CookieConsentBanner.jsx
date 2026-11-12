@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-const STORAGE_KEY = 'toolchoice_cookie_consent_v1';
+const STORAGE_KEY = 'toolchoice_privacy_notice_v2';
 
 export default function CookieConsentBanner() {
   const [visible, setVisible] = useState(false);
@@ -18,7 +18,7 @@ export default function CookieConsentBanner() {
     }
   }, []);
 
-  const handleAccept = (mode = 'accepted') => {
+  const handleAccept = (mode = 'acknowledged') => {
     try {
       localStorage.setItem(STORAGE_KEY, mode);
     } catch {
@@ -39,7 +39,7 @@ export default function CookieConsentBanner() {
         <div className="flex items-start gap-2.5 text-xs text-muted-foreground leading-relaxed">
           <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
           <p>
-            <strong className="text-foreground">Thông báo về Cookie & Quyền riêng tư:</strong> Toolchoice sử dụng bộ nhớ trình duyệt, cookie và dịch vụ đối tác bên thứ ba (bao gồm Google AdSense và công cụ đo lường hiệu năng) để ghi nhớ tùy chọn giao diện, phân tích lưu lượng truy cập và hiển thị quảng cáo phù hợp. Bằng việc tiếp tục sử dụng website, bạn đồng ý với{' '}
+            <strong className="text-foreground">Thông báo về Cookie & Quyền riêng tư:</strong> Toolchoice sử dụng bộ nhớ trình duyệt, cookie và dịch vụ đối tác bên thứ ba (bao gồm Google AdSense và công cụ đo lường hiệu năng) để ghi nhớ tùy chọn giao diện, phân tích lưu lượng truy cập và hiển thị quảng cáo phù hợp. Bạn có thể tìm hiểu cách dữ liệu được xử lý trong{' '}
             <a href="/privacy.html" className="underline text-foreground hover:text-primary font-medium">
               Chính sách quyền riêng tư
             </a>{' '}
@@ -59,10 +59,10 @@ export default function CookieConsentBanner() {
           </a>
           <Button
             size="sm"
-            onClick={() => handleAccept('accepted')}
+            onClick={() => handleAccept('acknowledged')}
             className="h-8 px-3 text-xs font-mono tracking-wider custom-primary-button"
           >
-            ĐÃ HIỂU & ĐỒNG Ý
+            ĐÃ HIỂU
           </Button>
           <button
             onClick={() => handleAccept('dismissed')}

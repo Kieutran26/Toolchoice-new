@@ -1,17 +1,4 @@
-import React from 'react';
-
 export default function DataTicker({ totalTools, categories }) {
-  const newToday = Math.min(3, totalTools);
-  
-  const tickerContent = `INDEXING ${totalTools} TOOLS  ◆  ${Object.keys(categories).length} CATEGORIES ACTIVE  ◆  ${newToday} NEW TODAY  ◆  SYSTEM STATUS: OPTIMAL  ◆  LATENCY: 12ms  ◆  UPTIME: 99.97%  ◆  `;
-
-  return (
-    <div className="h-7 custom-data-ticker overflow-hidden flex items-center">
-      <div className="ticker-scroll whitespace-nowrap flex">
-        <span className="text-[10px] font-mono tracking-[0.1em] px-4">
-          {tickerContent}{tickerContent}
-        </span>
-      </div>
-    </div>
-  );
+  const summary = `DANH MỤC: ${totalTools} CÔNG CỤ · ${Object.keys(categories || {}).length} NHÓM · KIỂM TRA GIÁ MỚI NHẤT TẠI NHÀ CUNG CẤP`;
+  return <div className="min-h-7 custom-data-ticker px-4 py-1 text-[10px] font-mono tracking-wide" aria-label="Thông tin danh mục">{summary}</div>;
 }

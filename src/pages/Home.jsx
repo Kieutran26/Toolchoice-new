@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { listTools } from '@/api/toolsClient';
+import { listTools, getInitialTools } from '@/api/toolsClient';
 import { useQuery } from '@tanstack/react-query';
 import { Menu } from 'lucide-react';
 import CommandSidebar from '@/components/layout/CommandSidebar';
@@ -12,6 +12,9 @@ import ThemeToggle from '@/components/layout/ThemeToggle';
 import { removeVietnameseTones } from '@/lib/utils';
 import { slugToPricing, pricingToSlug, categoryToSlug } from '@/lib/tool-categories';
 import NewsletterSubscription from '@/components/newsletter/NewsletterSubscription';
+import SiteFooter from '@/components/layout/SiteFooter';
+import HomeGuides from '@/components/layout/HomeGuides';
+import SEOHead from '@/components/SEOHead';
 
 export default function Home() {
   const { pricing: pricingParam } = useParams();
@@ -27,6 +30,7 @@ export default function Home() {
   const { data: tools = [], isLoading, error } = useQuery({
     queryKey: ['supabase-tools', 'all'],
     queryFn: () => listTools(1000),
+    initialData: getInitialTools,
   });
 
   // Category counts
@@ -64,6 +68,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead canonicalPath={pricingParam ? `/pricing/${pricingParam}` : '/'} title="Toolchoice - Danh mục công cụ và cẩm nang lựa chọn" description="Khám phá công cụ theo nhu cầu, đọc mô tả và tính năng được ghi nhận, tìm hướng dẫn lựa chọn và kiểm tra thông tin tại nhà cung cấp." />
       <CommandSidebar
         activeCategory={activeCategory}
         onCategoryChange={(nextCategory) => {
@@ -91,11 +96,11 @@ export default function Home() {
           <DataTicker totalTools={tools.length} categories={categoryCounts} />
           
           {/* Toolbar */}
-          <div className="flex items-center justify-between px-4 lg:px-5 py-3 border-b border-border">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-4 lg:px-5 py-3 border-b border-border">
+            <div className="flex min-w-0 items-center gap-3">
               <button
                 onClick={() => setIsMobileOpen(true)}
-                className="lg:hidden w-8 h-8 rounded flex items-center justify-center hover:bg-accent text-muted-foreground"
+                aria-label="Mở menu" className="lg:hidden w-11 h-11 rounded flex items-center justify-center hover:bg-accent text-muted-foreground"
               >
                 <Menu className="w-4 h-4" />
               </button>
@@ -108,18 +113,13 @@ export default function Home() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end [&_button]:min-h-11 sm:[&_button]:min-h-0">
               <PricingFilter active={pricingFilter} onChange={handlePricingChange} />
               <ThemeToggle />
             </div>
           </div>
         </div>
 
-        <section aria-label="Khám phá Toolchoice" className="px-4 lg:px-5 pt-5 text-sm text-muted-foreground">
-          <h2 className="text-lg font-semibold text-foreground">Khám phá công cụ cho công việc của bạn</h2>
-          <p className="mt-1">Tìm theo danh mục, đọc tổng quan và tính năng, rồi kiểm tra giá mới nhất tại nhà cung cấp.</p>
-          <a href="/choosing-tools.html" className="mt-2 inline-block underline">Cách so sánh và thử công cụ trước khi đăng ký</a>
-        </section>
         {/* Grid */}
         <div className="flex-1 p-4 lg:p-5">
           {error ? (
@@ -135,6 +135,7 @@ export default function Home() {
                 onSelectTool={setSelectedTool}
                 activePricingFilter={pricingFilter}
               />
+              <HomeGuides />
               <div className="mt-10">
                 <NewsletterSubscription variant="banner" source="home_footer" />
               </div>
@@ -142,12 +143,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* Terminal Footer */}
-        <div className="border-t border-border px-4 lg:px-5 py-2 bg-secondary/20">
-          <p className="text-[10px] font-mono text-muted-foreground/40 tracking-wider">
-            {'>'} neural-index --status // all systems operational // last_sync: {new Date().toISOString().split('T')[0]}
-          </p>
-        </div>
+        <SiteFooter />
       </div>
 
       <ToolDetailDrawer
