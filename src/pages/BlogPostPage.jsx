@@ -225,6 +225,8 @@ export default function BlogPostPage() {
                   </ul>
                 )}
 
+                {section.code && <pre className="overflow-x-auto rounded border border-border p-4 text-xs"><code>{section.code}</code></pre>}
+                {section.gradient && <figure><div role="img" aria-label="Mẫu gradient hai màu, từ trái sang phải" style={{ minHeight: 180, backgroundImage: section.gradient }} /><figcaption className="text-xs mt-2">Mẫu CSS do trình duyệt dựng trực tiếp từ đoạn mã trên.</figcaption></figure>}
                 {section.comparisonTable && (
                   <div className="overflow-x-auto rounded-xl border border-border my-4">
                     <table className="w-full text-left border-collapse text-xs sm:text-sm">
@@ -261,6 +263,7 @@ export default function BlogPostPage() {
             ))}
           </div>
 
+          {post.sources && <section className="space-y-2"><h2 className="text-lg font-semibold">Nguồn và phạm vi kiểm tra</h2><ul>{post.sources.map((source) => <li key={source.url}><a href={source.url} className="underline" target="_blank" rel="noopener noreferrer">{source.title}</a></li>)}</ul></section>}
           {/* Related Tools from Category */}
           {relatedTools.length > 0 && (
             <section className="rounded-xl border border-border bg-card p-5 sm:p-6 space-y-4">
@@ -297,7 +300,7 @@ export default function BlogPostPage() {
                       </p>
                     </div>
                     <span className="text-[11px] font-mono text-primary pt-1">
-                      Xem bài đánh giá chi tiết →
+                      Xem thông tin công cụ →
                     </span>
                   </Link>
                 ))}

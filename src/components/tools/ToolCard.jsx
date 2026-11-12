@@ -40,7 +40,7 @@ export default function ToolCard({ tool, onSelect, dimmed }) {
           <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
             <span className="text-xs font-mono text-primary tracking-wider flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5" />
-              XEM TÓM TẮT &amp; ĐÁNH GIÁ
+              XEM TÓM TẮT
             </span>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function ToolCard({ tool, onSelect, dimmed }) {
               onClick={(e) => e.stopPropagation()}
               className="text-[10px] font-mono font-semibold text-primary hover:underline ml-auto"
             >
-              Đánh giá chi tiết →
+              Thông tin chi tiết →
             </Link>
           </div>
         </div>

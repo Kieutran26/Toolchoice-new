@@ -19,6 +19,17 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAppState = async () => {
+    // Missing configuration must remain unauthenticated; do not request an undefined app.
+    if (!appParams.appId) {
+      setUser(null);
+      setIsAuthenticated(false);
+      setAuthError({ type: 'configuration_missing', message: 'Base44 app ID is not configured.' });
+      setAppPublicSettings(null);
+      setAuthChecked(true);
+      setIsLoadingPublicSettings(false);
+      setIsLoadingAuth(false);
+      return;
+    }
     try {
       setIsLoadingPublicSettings(true);
       setAuthError(null);

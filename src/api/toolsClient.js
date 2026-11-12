@@ -1,3 +1,4 @@
+import { getSafeWebsiteUrl } from '../lib/tool-content.js';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://rwphopolciuwrmmzztpm.supabase.co';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3cGhvcG9sY2l1d3JtbXp6dHBtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwODYxNDcsImV4cCI6MjA3ODY2MjE0N30._O7Q0NsrEXNDcUbc_xBJwpt_FDBIkiiwErxXFWyJCro';
 import { adminJson, adminRequest, uploadAdminImage } from './adminClient';
@@ -82,7 +83,7 @@ export function normalizeTool(tool) {
     pricing: normalizePricing(tool.pricing_type),
     feature_image_url: firstImage(tool.gallery_images),
     logo_url: tool.logo_url,
-    website_url: tool.link,
+    website_url: getSafeWebsiteUrl(tool.link),
     referral_offer: tool.referral_offer || '',
     referral_code: tool.referral_code || '',
     referral_parameter: tool.referral_parameter || '',

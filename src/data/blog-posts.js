@@ -1,4 +1,5 @@
-export const BLOG_POSTS = [
+import { GRADIENT_GUIDE } from './gradient-guide.js';
+export const BLOG_POSTS = [GRADIENT_GUIDE,
   {
     slug: 'khung-5-buoc-danh-gia-va-lua-chon-cong-cu-phu-hop',
     title: 'Khung 5 bước đánh giá và lựa chọn công cụ phần mềm thực chiến cho công việc',
@@ -170,7 +171,7 @@ export const BLOG_POSTS = [
   },
   {
     slug: 'cam-nang-cong-cu-thiet-ke-ui-ux-va-plugin-figma',
-    title: 'Cẩm nang chọn công cụ Thiết kế UI/UX & Plugin Figma giúp rút ngắn 60% thời gian làm sản phẩm',
+    title: 'Cẩm nang chọn công cụ Thiết kế UI/UX & Plugin Figma theo từng nhiệm vụ',
     category: 'Thiết kế & UI/UX',
     publishedAt: '2026-11-04',
     readingTime: '9 phút đọc',

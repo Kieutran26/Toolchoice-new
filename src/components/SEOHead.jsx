@@ -16,11 +16,11 @@ export default function SEOHead({
       ? title.includes('Toolchoice') || title.includes('ToolChoice')
         ? title
         : `${title} | Toolchoice`
-      : 'Toolchoice - Nền tảng đánh giá, so sánh & khám phá công cụ AI, phần mềm tiện ích';
+      : 'Toolchoice - Danh mục công cụ AI, phần mềm tiện ích và cẩm nang lựa chọn';
 
     const fullDescription =
       description ||
-      'Toolchoice là nền tảng tổng hợp, đánh giá chi tiết ưu nhược điểm, hướng dẫn sử dụng và so sánh các công cụ AI, thiết kế, lập trình, năng suất tốt nhất.';
+      'Toolchoice là nền tảng tổng hợp thông tin, tính năng và hướng dẫn lựa chọn các công cụ AI, thiết kế, lập trình, năng suất tốt nhất.';
 
     const normalizedPath = canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`;
     const canonicalUrl = `${SITE_ORIGIN}${normalizedPath === '/' ? '/' : normalizedPath.replace(/\/+$/, '')}`;

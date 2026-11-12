@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BLOG_POSTS } from '../src/data/blog-posts.js';
 import { CATEGORY_EDITORIAL_GUIDES } from '../src/data/category-guides.js';
-import { buildToolEditorialReview, getToolSlug, getPricingLabelVi } from '../src/lib/tool-content.js';
+import { buildToolEditorialReview, getToolSlug, getPricingLabelVi, getSafeWebsiteUrl } from '../src/lib/tool-content.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -88,7 +88,7 @@ function normalizeTool(tool) {
     pricing: normalizePricing(tool.pricing_type),
     feature_image_url: firstImage(tool.gallery_images),
     logo_url: tool.logo_url,
-    website_url: tool.link,
+    website_url: getSafeWebsiteUrl(tool.link),
     referral_offer: tool.referral_offer || '',
     has_promotion: Boolean(tool.has_promotion),
     promotion_code: tool.promotion_code || '',
@@ -125,7 +125,7 @@ function renderSharedFooterHtml() {
   return `
     <footer style="padding:32px 24px;border-top:1px solid #e2e8f0;margin-top:48px;font-size:13px;line-height:1.6;">
       <div style="max-width:1100px;margin:0 auto;">
-        <p><strong>Toolchoice (https://www.toolchoice.site)</strong> — Nền tảng tiếng Việt tổng hợp, đánh giá ưu nhược điểm, hướng dẫn sử dụng thực tế và so sánh các công cụ AI, thiết kế, lập trình, năng suất và marketing.</p>
+        <p><strong>Toolchoice (https://www.toolchoice.site)</strong> — Nền tảng tiếng Việt tổng hợp thông tin, tính năng và cẩm nang lựa chọn các công cụ AI, thiết kế, lập trình, năng suất và marketing.</p>
         <p>Liên hệ hỗ trợ &amp; góp ý nội dung: <a href="mailto:support@toolchoice.site">support@toolchoice.site</a></p>
         <nav aria-label="Liên kết bắt buộc và chính sách" style="display:flex;flex-wrap:wrap;gap:16px;margin-top:12px;">
           <a href="/">Trang chủ</a>
@@ -237,7 +237,7 @@ function renderToolListHtml(tools) {
                 Danh mục: ${escapeHtml(t.categories.join(', '))} · Mô hình giá: <strong>${escapeHtml(getPricingLabelVi(t.pricing))}</strong>
               </p>
               <p style="font-size:14px;margin:0 0 12px 0;">${escapeHtml(t.short_description)}</p>
-              <a href="/tool/${slug}" style="font-size:13px;font-weight:600;">Đọc bài đánh giá, ưu nhược điểm &amp; hướng dẫn →</a>
+              <a href="/tool/${slug}" style="font-size:13px;font-weight:600;">Xem thông tin và tính năng →</a>
             </article>
           `;
         })
@@ -271,8 +271,8 @@ function main() {
   // 1. Prerender Home (/)
   const homeBody = `
     <section>
-      <h1>Toolchoice — Nền tảng đánh giá, so sánh &amp; hướng dẫn sử dụng công cụ AI, Thiết kế, Lập trình</h1>
-      <p>Khám phá hơn ${tools.length} công cụ phần mềm được chọn lọc và phân tích chuyên sâu bằng tiếng Việt. Mỗi công cụ trên Toolchoice đều có bài đánh giá riêng biệt về tính năng, ưu nhược điểm thực tế, hướng dẫn sử dụng 4 bước và bảng so sánh trực tiếp với các giải pháp thay thế.</p>
+      <h1>Toolchoice — Danh mục công cụ AI, Thiết kế, Lập trình và cẩm nang lựa chọn</h1>
+      <p>Khám phá ${tools.length} công cụ trong danh mục tiếng Việt. Xem mô tả và tính năng được ghi nhận, phân loại theo nhu cầu và đối chiếu thông tin mới nhất tại nhà cung cấp. Các hồ sơ không phải báo cáo kiểm thử độc lập.</p>
       <h2>Chuyên mục Cẩm nang &amp; Hướng dẫn thực chiến nổi bật</h2>
       <ul>
         ${BLOG_POSTS.map(
@@ -293,9 +293,9 @@ function main() {
   `;
 
   const homeHtml = buildPageHtml(templateHtml, {
-    title: 'Toolchoice - Nền tảng đánh giá, so sánh & khám phá công cụ AI, phần mềm tiện ích',
+    title: 'Toolchoice - Danh mục công cụ AI, phần mềm tiện ích và cẩm nang lựa chọn',
     description:
-      'Toolchoice là nền tảng tiếng Việt tổng hợp, đánh giá ưu nhược điểm, hướng dẫn sử dụng thực tế và so sánh hơn 360 công cụ AI, thiết kế, lập trình, năng suất và marketing.',
+      'Toolchoice là nền tảng tiếng Việt tổng hợp thông tin, tính năng và cẩm nang lựa chọn hơn 360 công cụ AI, thiết kế, lập trình, năng suất và marketing.',
     canonicalPath: '/',
     jsonLd: {
       '@context': 'https://schema.org',
@@ -303,7 +303,7 @@ function main() {
       name: 'Toolchoice',
       url: SITE_ORIGIN,
       description:
-        'Nền tảng tiếng Việt tổng hợp, đánh giá ưu nhược điểm, hướng dẫn sử dụng và so sánh các công cụ AI, phần mềm tiện ích.',
+        'Nền tảng tiếng Việt tổng hợp thông tin, tính năng và cẩm nang lựa chọn các công cụ AI, phần mềm tiện ích.',
     },
     bodyHtml: homeBody,
   });
@@ -333,7 +333,7 @@ function main() {
     `;
 
     const catHtml = buildPageHtml(templateHtml, {
-      title: `${guide.title} — Đánh giá, Ưu nhược điểm & So sánh | Toolchoice`,
+      title: `${guide.title} — Danh mục và tiêu chí lựa chọn | Toolchoice`,
       description: guide.subtitle,
       canonicalPath: routePath,
       jsonLd: {
@@ -360,13 +360,13 @@ function main() {
     sitemapUrls.add(`${SITE_ORIGIN}${routePath}`);
 
     const prHtml = buildPageHtml(templateHtml, {
-      title: `Danh sách công cụ ${pr.label} tốt nhất — Đánh giá & So sánh | Toolchoice`,
-      description: `Tổng hợp ${prTools.length} công cụ và phần mềm thuộc nhóm ${pr.label} trên Toolchoice, kèm phân tích ưu nhược điểm và hướng dẫn sử dụng.`,
+      title: `Danh sách công cụ ${pr.label} — Danh mục theo nhãn giá | Toolchoice`,
+      description: `Tổng hợp ${prTools.length} công cụ và phần mềm thuộc nhóm ${pr.label} trên Toolchoice, kèm mô tả và tính năng được ghi nhận.`,
       canonicalPath: routePath,
       bodyHtml: `
         <section>
           <h1>Danh sách công cụ ${escapeHtml(pr.label)} (${prTools.length} công cụ)</h1>
-          <p>Tổng hợp các công cụ thuộc mô hình giá ${escapeHtml(pr.label)} đã được phân loại và đánh giá chi tiết trên Toolchoice.</p>
+          <p>Tổng hợp các công cụ thuộc mô hình giá ${escapeHtml(pr.label)} được phân loại trong danh mục Toolchoice. Giá và điều kiện thực tế cần đối chiếu tại nhà cung cấp.</p>
           ${renderToolListHtml(prTools.slice(0, 100))}
         </section>
       `,
@@ -453,6 +453,8 @@ function main() {
                   ? `<ul>${sec.bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join('\n')}</ul>`
                   : ''
               }
+              ${sec.code ? `<pre style="overflow-x:auto"><code>${escapeHtml(sec.code)}</code></pre>` : ''}
+              ${sec.gradient ? `<figure><div role="img" aria-label="Mẫu gradient hai màu, từ trái sang phải" style="min-height:180px;background-image:${escapeHtml(sec.gradient)}"></div><figcaption>Mẫu CSS do trình duyệt dựng trực tiếp từ đoạn mã trên.</figcaption></figure>` : ''}
               ${
                 sec.comparisonTable
                   ? `
@@ -480,6 +482,7 @@ function main() {
       </article>
     `;
 
+    const sourcesHtml = post.sources ? '<section><h2>Nguồn và phạm vi kiểm tra</h2><ul>' + post.sources.map((source) => '<li><a href="' + escapeHtml(source.url) + '">' + escapeHtml(source.title) + '</a></li>').join('') + '</ul></section>' : '';
     const postHtml = buildPageHtml(templateHtml, {
       title: `${post.title} | Toolchoice`,
       description: post.excerpt,
@@ -495,7 +498,7 @@ function main() {
         author: { '@type': 'Organization', name: 'Ban biên tập Toolchoice', url: SITE_ORIGIN },
         mainEntityOfPage: `${SITE_ORIGIN}${routePath}`,
       },
-      bodyHtml: postBody,
+      bodyHtml: postBody + sourcesHtml,
     });
     writeRouteHtml(routePath, postHtml);
   }
@@ -508,105 +511,27 @@ function main() {
 
     const review = buildToolEditorialReview(tool, tools);
 
+    const categorySlug = CATEGORY_SLUGS.find((category) => category.name === tool.category)?.slug || 'khac';
     const toolBody = `
       <article>
-        <p><a href="/">Trang chủ</a> / <a href="/category/${
-          CATEGORY_SLUGS.find((c) => c.name === tool.category)?.slug || 'khac'
-        }">${escapeHtml(tool.category)}</a> / ${escapeHtml(tool.name)}</p>
-        <h1>${escapeHtml(tool.name)} — Đánh giá tính năng, ưu nhược điểm &amp; hướng dẫn sử dụng</h1>
-        <p><strong>Mô hình giá:</strong> ${escapeHtml(review.pricingLabel)} · <strong>Danh mục:</strong> ${escapeHtml(review.categoriesJoined)}</p>
-        <p>${escapeHtml(tool.short_description)}</p>
-        ${
-          tool.website_url
-            ? `<p><a href="${escapeHtml(tool.website_url)}" rel="noopener noreferrer" target="_blank">Truy cập trang chủ chính thức của ${escapeHtml(tool.name)}</a></p>`
-            : ''
-        }
-
-        <h2>1. Tổng quan &amp; Phân tích chuyên sâu về ${escapeHtml(tool.name)}</h2>
-        ${review.overviewParagraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join('\n')}
-
-        <h2>2. Phân tích Ưu điểm &amp; Nhược điểm cần lưu ý</h2>
-        <h3>Ưu điểm nổi bật</h3>
-        <ul>
-          ${review.prosList.map((pro) => `<li>${escapeHtml(pro)}</li>`).join('\n')}
-        </ul>
-        <h3>Nhược điểm &amp; Hạn chế cần lưu ý</h3>
-        <ul>
-          ${review.consList.map((con) => `<li>${escapeHtml(con)}</li>`).join('\n')}
-        </ul>
-
-        <h2>3. Hướng dẫn sử dụng ${escapeHtml(tool.name)} hiệu quả từng bước</h2>
-        <ol>
-          ${review.howToSteps
-            .map((s) => `<li><strong>${escapeHtml(s.step)}:</strong> ${escapeHtml(s.detail)}</li>`)
-            .join('\n')}
-        </ol>
-
-        <h2>4. Đối tượng phù hợp &amp; Trường hợp sử dụng</h2>
-        <ul>
-          ${review.useCases
-            .map((u) => `<li><strong>${escapeHtml(u.title)}:</strong> ${escapeHtml(u.description)}</li>`)
-            .join('\n')}
-        </ul>
-
-        ${
-          review.alternatives.length > 0
-            ? `
-          <h2>5. So sánh ${escapeHtml(tool.name)} với các công cụ thay thế cùng phân khúc</h2>
-          <table style="width:100%;border-collapse:collapse;margin:16px 0;" border="1">
-            <thead>
-              <tr>
-                <th style="padding:8px;">Tên công cụ</th>
-                <th style="padding:8px;">Mô hình giá</th>
-                <th style="padding:8px;">Điểm mạnh chính</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${review.alternatives
-                .map(
-                  (alt) => `
-                  <tr>
-                    <td style="padding:8px;"><a href="/tool/${alt.slug}">${escapeHtml(alt.name)}</a></td>
-                    <td style="padding:8px;">${escapeHtml(alt.pricingLabel)}</td>
-                    <td style="padding:8px;">${escapeHtml(alt.shortDescription)}</td>
-                  </tr>
-                `
-                )
-                .join('\n')}
-            </tbody>
-          </table>
-        `
-            : ''
-        }
-
-        <h2>6. Câu hỏi thường gặp (FAQ) về ${escapeHtml(tool.name)}</h2>
-        ${review.faqs
-          .map(
-            (faq) => `
-            <h3>${escapeHtml(faq.question)}</h3>
-            <p>${escapeHtml(faq.answer)}</p>
-          `
-          )
-          .join('\n')}
-      </article>
-    `;
-
+        <p><a href="/">Trang chủ</a> / <a href="/category/${categorySlug}">${escapeHtml(review.primaryCategory)}</a></p>
+        <h1>${escapeHtml(tool.name)}</h1>
+        <p>${escapeHtml(review.categoriesJoined)} · Nhãn giá trong danh mục: ${escapeHtml(review.pricingLabel)}</p>
+        ${review.overviewParagraphs.map((paragraph) => '<p>' + escapeHtml(paragraph) + '</p>').join('')}
+        ${tool.website_url ? `<p><a href="${escapeHtml(tool.website_url)}" target="_blank" rel="noopener noreferrer">Truy cập website ${escapeHtml(tool.name)} (mở tab mới)</a></p>` : '<p>Website chính thức chưa có đường dẫn hợp lệ trong danh mục.</p>'}
+        ${review.prosList.length ? '<h2>Tính năng được ghi nhận</h2><ul>' + review.prosList.map((feature) => '<li>' + escapeHtml(feature) + '</li>').join('') + '</ul>' : ''}
+        <h2>Phạm vi thông tin</h2>
+        <p>${escapeHtml(review.disclosure)}</p>
+        <p>Kiểm tra giá, giới hạn gói, giấy phép và chính sách dữ liệu trên website nhà cung cấp trước khi đăng ký. <a href="/choosing-tools.html">Xem quy trình tự đánh giá công cụ</a>.</p>
+        <h2>Khám phá thêm trong danh mục ${escapeHtml(review.primaryCategory)}</h2>
+        <p>Các mục dưới đây cùng danh mục rộng, có thể giải quyết những nhiệm vụ khác nhau. Đây không phải xếp hạng hay khẳng định chúng thay thế trực tiếp cho nhau.</p>
+        <ul>${review.alternatives.map((item) => '<li><a href="/tool/' + item.slug + '">' + escapeHtml(item.name) + '</a> — ' + escapeHtml(item.shortDescription) + '</li>').join('')}</ul>
+        <p><a href="/blog">Đọc cẩm nang và ví dụ thực hành</a></p>
+      </article>`;
     const toolHtml = buildPageHtml(templateHtml, {
-      title: `Đánh giá ${tool.name}: Tính năng, Ưu nhược điểm, Hướng dẫn & So sánh | Toolchoice`,
-      description: `Đánh giá chi tiết ${tool.name} (${review.pricingLabel}): ${tool.short_description} Phân tích ưu nhược điểm, hướng dẫn sử dụng từng bước và so sánh công cụ thay thế.`,
-      canonicalPath: routePath,
-      ogType: 'article',
-      ogImage: tool.feature_image_url || `${SITE_ORIGIN}/logo.png`,
-      jsonLd: {
-        '@context': 'https://schema.org',
-        '@type': 'SoftwareApplication',
-        name: tool.name,
-        applicationCategory: review.categoriesJoined,
-        operatingSystem: 'Web, Cloud',
-        description: tool.full_description || tool.short_description,
-        url: `${SITE_ORIGIN}${routePath}`,
-      },
-      bodyHtml: toolBody,
+      title: `${tool.name}: thông tin, tính năng và danh mục | Toolchoice`,
+      description: tool.short_description || tool.full_description,
+      canonicalPath: routePath, bodyHtml: toolBody,
     });
     writeRouteHtml(routePath, toolHtml);
   }
