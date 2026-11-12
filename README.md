@@ -51,3 +51,9 @@ Public information pages live in `public/about.html`, `public/contact.html`, `pu
 `public/sitemap.xml` lists the public entry points referenced by `public/robots.txt`. `public/ads.txt` and the AdSense account meta tag must use the same publisher account. Site approval remains Google's decision; publishing these pages does not guarantee approval.
 
 Production `www.toolchoice.site` is served by the existing Vercel project `toolchoice-new` in team `nguyenngockieutran-3710s-projects`. CLI deployments use `npx vercel deploy --prod --yes --scope nguyenngockieutran-3710s-projects` after linking that project. `.vercelignore` excludes local environment files and private workspace metadata. Never commit or upload environment secrets. Verify public pages and `ads.txt` after deployment; use the Vercel deployment history to restore the previous production deployment if needed.
+
+### Catalogue content integrity
+
+Tool profiles render only catalogue descriptions and recorded features through `src/lib/tool-content.js`. Do not infer speed, reliability, strengths or limitations from category or pricing, and do not label catalogue entries as independently tested reviews. Similar-category entries are discovery suggestions, not interchangeable product recommendations. Home must retain guide links and the footer after React mounts. The shared ticker reports catalogue counts only.
+
+Worked examples live with blog data; their optional code, visual preview and sources must render in both `BlogPostPage` and `scripts/prerender.mjs`. Verify with `npm run build` followed by `node --test tests/publisher-content.test.mjs`. Google approval is an external decision.
