@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { listTools, getInitialTools } from '@/api/toolsClient';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Menu, Search, CheckCircle2, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Menu, Search } from 'lucide-react';
 import CommandSidebar from '@/components/layout/CommandSidebar';
 import DataTicker from '@/components/layout/DataTicker';
 import ToolGrid from '@/components/tools/ToolGrid';
@@ -166,8 +166,8 @@ export default function CategoryPage() {
           </div>
         </div>
 
-        {/* Category Editorial Guide */}
-        <section aria-label={`Hướng dẫn chọn công cụ ${label}`} className="px-4 lg:px-5 pt-5">
+        {/* Category Editorial Guide (hidden) */}
+        {/* <section aria-label={`Hướng dẫn chọn công cụ ${label}`} className="px-4 lg:px-5 pt-5">
           <div className="rounded-xl border border-border bg-card p-5 space-y-4">
             <div className="space-y-1.5">
               <span className="text-[10px] font-mono uppercase tracking-widest text-primary bg-primary/10 px-2 py-0.5 rounded">
@@ -197,7 +197,7 @@ export default function CategoryPage() {
               </p>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Grid */}
         <div className="flex-1 p-4 lg:p-5 space-y-6">
