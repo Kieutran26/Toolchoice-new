@@ -181,17 +181,7 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
                   </div>
                 )}
 
-                {/* Link to Full Review Page */}
-                <div className="pt-2">
-                  <Link
-                    to={`/tool/${toolSlug}`}
-                    onClick={onClose}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border border-primary/30 bg-primary/10 text-primary text-xs font-mono font-bold hover:bg-primary/15 transition-colors"
-                  >
-                    <BookOpen className="w-4 h-4" />
-                    XEM HƯỚNG DẪN TỪNG BƯỚC &amp; BẢNG SO SÁNH CHI TIẾT →
-                  </Link>
-                </div>
+
               </div>
             </div>
           </motion.div>
