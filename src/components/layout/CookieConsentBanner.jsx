@@ -39,7 +39,7 @@ export default function CookieConsentBanner() {
         <div className="flex items-start gap-2.5 text-xs text-muted-foreground leading-relaxed">
           <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
           <p>
-            <strong className="text-foreground">Thông báo về Cookie & Quyền riêng tư:</strong> Toolchoice sử dụng bộ nhớ trình duyệt, cookie và dịch vụ đối tác bên thứ ba (bao gồm Google AdSense và công cụ đo lường hiệu năng) để ghi nhớ tùy chọn giao diện, phân tích lưu lượng truy cập và hiển thị quảng cáo phù hợp. Bạn có thể tìm hiểu cách dữ liệu được xử lý trong{' '}
+            <strong className="text-foreground">Thông báo về Cookie & Quyền riêng tư:</strong> Toolchoice sử dụng bộ nhớ trình duyệt, cookie và dịch vụ đối tác bên thứ ba (bao gồm Google AdSense, Adsterra và công cụ đo lường hiệu năng) để ghi nhớ tùy chọn giao diện, phân tích lưu lượng truy cập và hiển thị quảng cáo phù hợp. Bạn có thể tìm hiểu cách dữ liệu được xử lý trong{' '}
             <a href="/privacy.html" className="underline text-foreground hover:text-primary font-medium">
               Chính sách quyền riêng tư
             </a>{' '}
