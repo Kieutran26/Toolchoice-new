@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import ToolCard from './ToolCard';
+import AdsterraBanner from '@/components/ads/AdsterraBanner';
 import { Skeleton } from "@/components/ui/skeleton";
 
 const BATCH_SIZE = 30;
@@ -75,13 +76,15 @@ export default function ToolGrid({ tools, isLoading, onSelectTool, activePricing
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
-        {visibleTools.map((tool) => (
-          <ToolCard
-            key={tool.id}
-            tool={tool}
-            onSelect={onSelectTool}
-            dimmed={activePricingFilter && tool.pricing !== activePricingFilter}
-          />
+        {visibleTools.map((tool, index) => (
+          <React.Fragment key={tool.id}>
+            <ToolCard
+              tool={tool}
+              onSelect={onSelectTool}
+              dimmed={activePricingFilter && tool.pricing !== activePricingFilter}
+            />
+            {index === Math.min(5, visibleTools.length - 1) && <AdsterraBanner />}
+          </React.Fragment>
         ))}
       </div>
 
