@@ -181,7 +181,18 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
                   </div>
                 )}
 
-
+                <aside aria-label="Quảng cáo" className="flex min-w-0 flex-col items-center gap-2 overflow-hidden border-t border-border pt-5 pb-2">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Quảng cáo</span>
+                  <iframe
+                    key={tool.id}
+                    title="Quảng cáo Adsterra"
+                    src="/adsterra-detail-banner.html"
+                    width="320"
+                    height="50"
+                    loading="lazy"
+                    className="block max-w-full border-0"
+                  />
+                </aside>
               </div>
             </div>
           </motion.div>
