@@ -71,6 +71,18 @@ export default function ToolDetailPage() {
             </table></div>
           </section>}
           <p><Link className="underline" to="/blog">Đọc cẩm nang và ví dụ thực hành</Link></p>
+          <aside aria-label="Quảng cáo" className="flex min-w-0 flex-col items-center gap-2 overflow-hidden border-t border-border pt-6">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Quảng cáo</span>
+            <iframe
+              key={slug}
+              title="Quảng cáo Adsterra"
+              src="/adsterra-detail-banner.html"
+              width="320"
+              height="50"
+              loading="lazy"
+              className="block max-w-full border-0"
+            />
+          </aside>
         </article>
         <SiteFooter />
       </div>
