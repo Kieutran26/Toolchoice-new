@@ -141,14 +141,14 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
                     TỔNG QUAN &amp; ĐÁNH GIÁ
                   </h3>
                   <div className="space-y-2 text-sm text-muted-foreground leading-relaxed">
-                    {review.overviewParagraphs.slice(0, 2).map((p, i) => (
+                    {review.overviewParagraphs?.slice(0, 2).map((p, i) => (
                       <p key={i}>{p}</p>
                     ))}
                   </div>
                 </div>
 
                 {/* Pros */}
-                {review.prosList.length > 0 && (
+                {review.prosList?.length > 0 && (
                   <div>
                     <h3 className="text-[10px] font-mono font-semibold text-emerald-600 dark:text-emerald-400 tracking-[0.15em] mb-2.5">
                       ƯU ĐIỂM &amp; TÍNH NĂNG NỔI BẬT
@@ -165,7 +165,7 @@ export default function ToolDetailDrawer({ tool, isOpen, onClose }) {
                 )}
 
                 {/* Cons / Caveats */}
-                {review.consList.length > 0 && (
+                {review.consList?.length > 0 && (
                   <div>
                     <h3 className="text-[10px] font-mono font-semibold text-amber-600 dark:text-amber-400 tracking-[0.15em] mb-2.5">
                       LƯU Ý &amp; HẠN CHẾ KHI SỬ DỤNG

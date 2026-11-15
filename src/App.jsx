@@ -21,6 +21,7 @@ import SEOHead from '@/components/SEOHead';
 import CookieConsentBanner from '@/components/layout/CookieConsentBanner';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import { AuthProvider } from '@/lib/AuthContext';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const AdminRouteWrapper = () => (
   <>
@@ -61,20 +62,22 @@ const PublicApp = () => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClientInstance}>
-          <Router>
-            <ScrollToTop />
-            <PublicApp />
-            <CookieConsentBanner />
-          </Router>
-          <Toaster />
-          <Analytics />
-          <SpeedInsights />
-        </QueryClientProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <QueryClientProvider client={queryClientInstance}>
+            <Router>
+              <ScrollToTop />
+              <PublicApp />
+              <CookieConsentBanner />
+            </Router>
+            <Toaster />
+            <Analytics />
+            <SpeedInsights />
+          </QueryClientProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }
 

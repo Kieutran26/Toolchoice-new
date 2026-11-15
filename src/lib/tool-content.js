@@ -59,6 +59,7 @@ export function buildToolEditorialReview(tool, allTools = []) {
     primaryCategory, categoriesJoined, pricingLabel: getPricingLabelVi(tool.pricing),
     overviewParagraphs: description ? [description] : [],
     prosList: features,
+    consList: [],
     disclosure: 'Đây là hồ sơ thông tin từ danh mục Toolchoice, không phải báo cáo kiểm thử độc lập. Tính năng và nhãn giá có thể thay đổi; các liên kết có thể chứa mã giới thiệu. Chúng tôi không tự suy ra tốc độ, độ ổn định hoặc ưu nhược điểm từ danh mục hay giá.',
     alternatives: allTools.filter((other) => other.id !== tool.id && (other.category === primaryCategory || other.categories?.includes(primaryCategory)))
       .slice(0, 4).map((other) => ({ id: other.id, name: other.name, slug: getToolSlug(other),
